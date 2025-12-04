@@ -44,3 +44,5 @@ Thumbs.db
 .cache/
 .eslintcache
 .tap/
+
+/src/generated/prisma
