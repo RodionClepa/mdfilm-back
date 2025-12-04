@@ -1,7 +1,8 @@
 {
   "name": "back",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
+  "type": "module",
   "scripts": {
     "build": "rimraf dist && npx tsc",
     "prestart": "npm run build",
@@ -16,9 +17,18 @@
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^24.10.1",
+    "@types/pg": "^8.15.6",
     "concurrently": "^9.2.1",
     "nodemon": "^3.1.11",
+    "prisma": "^7.1.0",
     "rimraf": "^6.1.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/client": "^7.1.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "pg": "^8.16.3"
   }
 }
