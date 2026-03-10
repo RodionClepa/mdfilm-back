@@ -6,10 +6,122 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://username:password@localhost:51213/mydatabase"
+}
+
+// --- Lookup Tables (Replacing Enums) ---
+
+model MediaType {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique // e.g., "SERIES", "MOVIE"
+  media Media[]
+
+  @@map("Media_Types")
+}
+
+model WatchLinkType {
+  id         Int         @id @default(autoincrement())
+  name       String      @unique // e.g., "TRAILER", "FULL", "CLIP"
+  watchLinks WatchLink[]
+
+  @@map("Watch_Link_Types")
+}
+
+// --- Main Models ---
+
+model Media {
+  id          Int       @id @default(autoincrement()) @map("media_id")
+  title       String
+  releaseDate DateTime  @map("release_date")
+  synopsis    String?   @db.Text
+  country     String?
+  posterImage String?   @map("poster_image")
+  
+  // Relation to MediaType Table
+  typeId      Int       @map("type_id")
+  type        MediaType @relation(fields: [typeId], references: [id])
+  
+  directorId  Int?      @map("director_id")
+  director    Director? @relation(fields: [directorId], references: [id])
+  
+  movieInfo   MovieInfo?
+  seriesInfo  SeriesInfo?
+  seasons     Season[]
+  watchLinks  WatchLink[]
+
+  @@map("Media")
+}
+
+model Director {
+  id    Int     @id @default(autoincrement())
+  name  String
+  media Media[]
+}
+
+model MovieInfo {
+  mediaId  Int    @id @unique @map("media_id")
+  duration Int 
+  budget   Float?
+  
+  media    Media  @relation(fields: [mediaId], references: [id])
+
+  @@map("Movie_Info")
+}
+
+model SeriesInfo {
+  mediaId      Int       @id @unique @map("media_id")
+  totalSeasons Int       @default(1) @map("total_seasons")
+  status       String?
+  firstAirDate DateTime  @map("first_air_date")
+  lastAirDate  DateTime? @map("last_air_date")
+  
+  media        Media     @relation(fields: [mediaId], references: [id])
+
+  @@map("Series_Info")
+}
+
+model Season {
+  id           Int       @id @default(autoincrement()) @map("season_id")
+  mediaId      Int       @map("media_id")
+  seasonNumber Int       @map("season_number")
+  releaseYear  Int       @map("release_year")
+  
+  media        Media     @relation(fields: [mediaId], references: [id])
+  episodes     Episode[]
+
+  @@map("Season")
+}
+
+model Episode {
+  id              Int         @id @default(autoincrement()) @map("episode_id")
+  seasonId        Int         @map("season_id")
+  episodeNumber   Int         @map("episode_number")
+  durationMinutes Int?        @map("duration_minutes")
+  airDate         DateTime?   @map("air_date")
+  
+  season          Season      @relation(fields: [seasonId], references: [id])
+  watchLinks      WatchLink[]
+
+  @@map("Episodes")
+}
+
+model WatchLink {
+  id        Int           @id @default(autoincrement()) @map("watch_id")
+  mediaId   Int           @map("media_id")
+  episodeId Int?          @map("episode_id")
+  platform  String
+  url       String
+
+  // Relation to WatchLinkType Table
+  typeId    Int           @map("type_id")
+  type      WatchLinkType @relation(fields: [typeId], references: [id])
+
+  media     Media         @relation(fields: [mediaId], references: [id])
+  episode   Episode?      @relation(fields: [episodeId], references: [id])
+
+  @@map("Watch_Links")
 }

@@ -46,3 +46,7 @@ Thumbs.db
 .tap/
 
 /src/generated/prisma
+
+/generated/prisma
+
+/generated/prisma
