@@ -1,0 +1,93 @@
+{
+  "info": {
+    "name": "Movie API",
+    "_postman_id": "00000000-0000-0000-0000-000000000001",
+    "description": "Collection to test Movie routes (`/api/movies`).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get all movies",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/movies",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "movies"]
+        }
+      }
+    },
+    {
+      "name": "Get movie by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/movies/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "movies", "1"]
+        }
+      }
+    },
+    {
+      "name": "Create movie",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Test Movie\",\n  \"releaseDate\": \"2025-01-01\",\n  \"synopsis\": \"Test synopsis\",\n  \"country\": \"US\",\n  \"posterImage\": \"https://example.com/poster.jpg\",\n  \"directorId\": 1,\n  \"duration\": 120,\n  \"budget\": 100000000\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/movies",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "movies"]
+        }
+      }
+    },
+    {
+      "name": "Update movie",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Movie\",\n  \"synopsis\": \"Updated synopsis\",\n  \"duration\": 130,\n  \"budget\": 110000000\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/movies/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "movies", "1"]
+        }
+      }
+    },
+    {
+      "name": "Delete movie",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/movies/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "movies", "1"]
+        }
+      }
+    }
+  ]
+}
+

@@ -21,7 +21,7 @@ export class MovieService {
   async getAll() {
     return prisma.media.findMany({
       where: { type: { name: 'MOVIE' } },
-      include: { movieInfo: true, type: true, director: true },
+      include: { movieInfo: true, type: true, directors: { include: { director: true } } },
     });
   }
 
@@ -31,7 +31,7 @@ export class MovieService {
     // Using our helper to ensure existence and type safety
     const movie = await prisma.media.findFirst({
       where: { id, type: { name: 'MOVIE' } },
-      include: { movieInfo: true, director: true },
+      include: { movieInfo: true, directors: { include: { director: true } } },
     });
 
     if (!movie) throw new Error(`Movie with ID ${id} not found.`);
@@ -52,12 +52,6 @@ export class MovieService {
       throw new Error("MediaType 'MOVIE' not found. Please seed your database.");
     }
 
-    // 3. Optional: Verify Director exists if directorId is provided
-    if (data.directorId) {
-      const director = await prisma.director.findUnique({ where: { id: data.directorId } });
-      if (!director) throw new Error("Director not found.");
-    }
-
     return prisma.media.create({
       data: {
         title: data.title,
@@ -66,7 +60,6 @@ export class MovieService {
         country: data.country,
         posterImage: data.posterImage,
         typeId: movieType.id,
-        directorId: data.directorId,
         movieInfo: {
           create: {
             duration: data.duration,

@@ -1,0 +1,258 @@
+{
+  "info": {
+    "name": "Series API",
+    "_postman_id": "00000000-0000-0000-0000-000000000003",
+    "description": "Collection to test Series routes (`/api/series`) and the follow-up Season/Episode flow (create series -> add seasons -> add episodes).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get all series",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/series",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "series"]
+        }
+      }
+    },
+    {
+      "name": "Get series by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/series/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "series", "1"]
+        }
+      }
+    },
+    {
+      "name": "Create series",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Test Series\",\n  \"releaseDate\": \"2025-03-01\",\n  \"synopsis\": \"Test series synopsis\",\n  \"country\": \"US\",\n  \"posterImage\": \"https://example.com/series.jpg\",\n  \"directorId\": 1,\n  \"totalSeasons\": 2,\n  \"status\": \"ONGOING\",\n  \"firstAirDate\": \"2025-03-01\",\n  \"lastAirDate\": null\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/series",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "series"]
+        }
+      }
+    },
+    {
+      "name": "Update series",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Series\",\n  \"synopsis\": \"Updated synopsis\",\n  \"totalSeasons\": 3,\n  \"status\": \"ENDED\",\n  \"lastAirDate\": \"2026-01-01\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/series/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "series", "1"]
+        }
+      }
+    },
+    {
+      "name": "Delete series",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/series/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "series", "1"]
+        }
+      }
+    }
+    ,
+    {
+      "name": "List seasons by series",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/series/1/seasons",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "series", "1", "seasons"]
+        }
+      }
+    },
+    {
+      "name": "Create season for series",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"seasonNumber\": 1,\n  \"releaseYear\": 2025\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/series/1/seasons",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "series", "1", "seasons"]
+        }
+      }
+    },
+    {
+      "name": "Get season by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/seasons/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "seasons", "1"]
+        }
+      }
+    },
+    {
+      "name": "Update season",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"seasonNumber\": 1,\n  \"releaseYear\": 2026\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/seasons/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "seasons", "1"]
+        }
+      }
+    },
+    {
+      "name": "Delete season",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/seasons/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "seasons", "1"]
+        }
+      }
+    },
+    {
+      "name": "List episodes by season",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/seasons/1/episodes",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "seasons", "1", "episodes"]
+        }
+      }
+    },
+    {
+      "name": "Create episode for season",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"episodeNumber\": 1,\n  \"durationMinutes\": 42,\n  \"airDate\": \"2025-03-10\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/seasons/1/episodes",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "seasons", "1", "episodes"]
+        }
+      }
+    },
+    {
+      "name": "Get episode by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/episodes/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "episodes", "1"]
+        }
+      }
+    },
+    {
+      "name": "Update episode",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"episodeNumber\": 1,\n  \"durationMinutes\": 45\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/episodes/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "episodes", "1"]
+        }
+      }
+    },
+    {
+      "name": "Delete episode",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/episodes/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "episodes", "1"]
+        }
+      }
+    }
+  ]
+}
+

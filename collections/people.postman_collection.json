@@ -1,0 +1,57 @@
+{
+  "info": {
+    "name": "People API",
+    "_postman_id": "00000000-0000-0000-0000-000000000004",
+    "description": "Create/list People (cast members) used for Media cast attachment.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get all people",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/people",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "people"]
+        }
+      }
+    },
+    {
+      "name": "Get person by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/people/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "people", "1"]
+        }
+      }
+    },
+    {
+      "name": "Create person",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Keanu Reeves\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/people",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "people"]
+        }
+      }
+    }
+  ]
+}
+

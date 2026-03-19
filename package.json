@@ -8,7 +8,9 @@
     "prestart": "npm run build",
     "start": "node dist/src/index.js",
     "preserve": "npm run build",
-    "serve": "concurrently \"npx tsc -w\" \"nodemon dist/src/index.js\""
+    "serve": "concurrently \"npx tsc -w\" \"nodemon dist/src/index.js\"",
+    "prisma:seed": "npx tsx prisma/seed.ts",
+    "db:seed": "npm run prisma:seed"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +24,8 @@
     "nodemon": "^3.1.11",
     "prisma": "^7.2.0",
     "rimraf": "^6.1.2",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -30,5 +34,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "pg": "^8.16.3"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
   }
 }

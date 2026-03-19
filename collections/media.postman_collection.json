@@ -1,0 +1,261 @@
+{
+  "info": {
+    "name": "Media API",
+    "_postman_id": "00000000-0000-0000-0000-000000000002",
+    "description": "Collection to test Media routes (`/api/media`). Covers generic media, movies-as-media, and series-as-media.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get all media",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/media",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media"]
+        }
+      }
+    },
+    {
+      "name": "Get media by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/media/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1"]
+        }
+      }
+    },
+    {
+      "name": "Create generic media (no movie/series info)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Generic Media\",\n  \"releaseDate\": \"2025-01-01\",\n  \"synopsis\": \"Just a media item\",\n  \"country\": \"US\",\n  \"posterImage\": \"https://example.com/media.jpg\",\n  \"typeName\": \"MEDIA\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/media",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media"]
+        }
+      }
+    },
+    {
+      "name": "Create movie as media",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Media Movie\",\n  \"releaseDate\": \"2025-02-01\",\n  \"synopsis\": \"Movie created via Media endpoint\",\n  \"country\": \"US\",\n  \"posterImage\": \"https://example.com/movie.jpg\",\n  \"typeName\": \"MOVIE\",\n  \"duration\": 120,\n  \"budget\": 90000000\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/media",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media"]
+        }
+      }
+    },
+    {
+      "name": "Create series as media",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Media Series\",\n  \"releaseDate\": \"2025-03-01\",\n  \"synopsis\": \"Series created via Media endpoint\",\n  \"country\": \"US\",\n  \"posterImage\": \"https://example.com/series.jpg\",\n  \"typeName\": \"SERIES\",\n  \"totalSeasons\": 3,\n  \"status\": \"ONGOING\",\n  \"firstAirDate\": \"2025-03-01\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/media",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media"]
+        }
+      }
+    },
+    {
+      "name": "Update media",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Media Title\",\n  \"synopsis\": \"Updated media synopsis\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/media/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1"]
+        }
+      }
+    },
+    {
+      "name": "Delete media",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/media/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1"]
+        }
+      }
+    },
+    {
+      "name": "Get directors for media",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/media/1/directors",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1", "directors"]
+        }
+      }
+    },
+    {
+      "name": "Add directors to media",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"directorIds\": [1, 2]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/media/1/directors",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1", "directors"]
+        }
+      }
+    },
+    {
+      "name": "Replace directors for media",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"directorIds\": [2]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/media/1/directors",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1", "directors"]
+        }
+      }
+    },
+    {
+      "name": "Remove director from media",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/media/1/directors/2",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1", "directors", "2"]
+        }
+      }
+    },
+    {
+      "name": "Get cast for media",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/media/1/cast",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1", "cast"]
+        }
+      }
+    },
+    {
+      "name": "Add cast member to media",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"personId\": 1,\n  \"characterName\": \"Main role\",\n  \"billingOrder\": 1\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/media/1/cast",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1", "cast"]
+        }
+      }
+    },
+    {
+      "name": "Replace cast for media",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cast\": [\n    { \"personId\": 1, \"characterName\": \"Role A\", \"billingOrder\": 1 },\n    { \"personId\": 2, \"characterName\": \"Role B\", \"billingOrder\": 2 }\n  ]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/media/1/cast",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1", "cast"]
+        }
+      }
+    },
+    {
+      "name": "Remove cast member from media",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/media/1/cast/2",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "media", "1", "cast", "2"]
+        }
+      }
+    }
+  ]
+}
+

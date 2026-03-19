@@ -44,9 +44,10 @@ model Media {
   // Relation to MediaType Table
   typeId      Int       @map("type_id")
   type        MediaType @relation(fields: [typeId], references: [id])
-  
-  directorId  Int?      @map("director_id")
-  director    Director? @relation(fields: [directorId], references: [id])
+ 
+  // Directors/Cast are attached AFTER media creation
+  directors   MediaDirector[]
+  cast        MediaCast[]
   
   movieInfo   MovieInfo?
   seriesInfo  SeriesInfo?
@@ -59,7 +60,41 @@ model Media {
 model Director {
   id    Int     @id @default(autoincrement())
   name  String
-  media Media[]
+  media MediaDirector[]
+}
+
+model MediaDirector {
+  mediaId    Int      @map("media_id")
+  directorId Int      @map("director_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  media      Media    @relation(fields: [mediaId], references: [id])
+  director   Director @relation(fields: [directorId], references: [id])
+
+  @@id([mediaId, directorId])
+  @@map("Media_Directors")
+}
+
+model Person {
+  id    Int        @id @default(autoincrement())
+  name  String
+  cast  MediaCast[]
+
+  @@map("People")
+}
+
+model MediaCast {
+  mediaId       Int      @map("media_id")
+  personId      Int      @map("person_id")
+  characterName String?  @map("character_name")
+  billingOrder  Int?     @map("billing_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  media         Media    @relation(fields: [mediaId], references: [id])
+  person        Person   @relation(fields: [personId], references: [id])
+
+  @@id([mediaId, personId])
+  @@map("Media_Cast")
 }
 
 model MovieInfo {
