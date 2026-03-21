@@ -1,7 +1,43 @@
 import { api } from './api';
-import type { Episode, Media, MediaCast, MediaDirector, Person, Season, Director } from './types';
+import type { Episode, Media, MediaCast, MediaDirector, Person, Season, Director, HomepageFeaturedMedia, User, Bookmark } from './types';
 
 export const endpoints = {
+  auth: {
+    me: () => api<User>('/api/auth/me'),
+  },
+  bookmarks: {
+    list: (params?: { type?: 'MOVIE' | 'SERIES'; q?: string; sort?: string }) => {
+      const sp = new URLSearchParams();
+      if (params?.type) sp.set('type', params.type);
+      if (params?.q) sp.set('q', params.q);
+      if (params?.sort) sp.set('sort', params.sort);
+      const qs = sp.toString();
+      return api<Bookmark[]>(`/api/bookmarks${qs ? `?${qs}` : ''}`);
+    },
+    status: (mediaIds: number[]) => {
+      const qs = mediaIds.length ? `?mediaIds=${encodeURIComponent(mediaIds.join(','))}` : '';
+      return api<{ bookmarked: number[] }>(`/api/bookmarks/status${qs}`);
+    },
+    add: (mediaId: number) =>
+      api<Bookmark>('/api/bookmarks', { method: 'POST', body: JSON.stringify({ mediaId }) }),
+    remove: (mediaId: number) => api<void>(`/api/bookmarks/${mediaId}`, { method: 'DELETE' }),
+  },
+  homepage: {
+    featured: () => api<Media[]>('/api/homepage/featured'),
+    latestMovies: () => api<Media[]>('/api/homepage/latest/movies'),
+    latestSeries: () => api<Media[]>('/api/homepage/latest/series'),
+    upcomingMovies: () => api<Media[]>('/api/homepage/upcoming/movies'),
+    upcomingSeries: () => api<Media[]>('/api/homepage/upcoming/series'),
+
+    adminFeaturedList: () => api<HomepageFeaturedMedia[]>('/api/homepage/admin/featured'),
+    adminFeaturedReplace: (
+      items: Array<{ mediaId: number; position: number; enabled?: boolean }>,
+    ) =>
+      api<HomepageFeaturedMedia[]>('/api/homepage/admin/featured', {
+        method: 'PUT',
+        body: JSON.stringify(items),
+      }),
+  },
   media: {
     list: () => api<Media[]>('/api/media'),
     get: (id: number) => api<Media>(`/api/media/${id}`),
@@ -107,15 +143,23 @@ export const endpoints = {
   directors: {
     list: () => api<Director[]>('/api/directors'),
     get: (id: number) => api<Director>(`/api/directors/${id}`),
-    create: (name: string) =>
-      api<Director>('/api/directors', { method: 'POST', body: JSON.stringify({ name }) }),
+    filmography: (id: number) => api<Media[]>(`/api/directors/${id}/filmography`),
+    create: (data: any) =>
+      api<Director>('/api/directors', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: any) =>
+      api<Director>(`/api/directors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: number) => api<void>(`/api/directors/${id}`, { method: 'DELETE' }),
   },
 
   people: {
     list: () => api<Person[]>('/api/people'),
     get: (id: number) => api<Person>(`/api/people/${id}`),
-    create: (name: string) =>
-      api<Person>('/api/people', { method: 'POST', body: JSON.stringify({ name }) }),
+    filmography: (id: number) => api<Media[]>(`/api/people/${id}/filmography`),
+    create: (data: any) =>
+      api<Person>('/api/people', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: any) =>
+      api<Person>(`/api/people/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: number) => api<void>(`/api/people/${id}`, { method: 'DELETE' }),
   },
 };
 

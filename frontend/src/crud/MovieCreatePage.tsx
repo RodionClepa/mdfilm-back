@@ -69,6 +69,14 @@ export function MovieCreatePage() {
         <input type="date" value={form.releaseDate} onChange={(e) => setForm((f) => ({ ...f, releaseDate: e.target.value }))} />
       </div>
       <div className="row">
+        <div className="muted">country</div>
+        <input value={form.country} onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))} placeholder="optional" />
+      </div>
+      <div className="row">
+        <div className="muted">posterImage</div>
+        <input value={form.posterImage} onChange={(e) => setForm((f) => ({ ...f, posterImage: e.target.value }))} placeholder="optional url" />
+      </div>
+      <div className="row">
         <div className="muted">directorId</div>
         <input value={form.directorId} onChange={(e) => setForm((f) => ({ ...f, directorId: e.target.value }))} placeholder="optional (number)" />
       </div>

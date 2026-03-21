@@ -82,6 +82,9 @@ export class MovieService {
       data: {
         title: data.title,
         synopsis: data.synopsis,
+        country: data.country,
+        posterImage: data.posterImage,
+        releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
         movieInfo: {
           update: {
             duration: data.duration,

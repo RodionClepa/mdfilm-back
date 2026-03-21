@@ -31,6 +31,20 @@ export function DirectorListPage() {
     void refresh();
   }, []);
 
+  async function remove(id: number) {
+    if (!confirm(`Delete director #${id}?`)) return;
+    setError(null);
+    setLoading(true);
+    try {
+      await endpoints.directors.delete(id);
+      await refresh();
+    } catch (e) {
+      setError(showError(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="panel">
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
@@ -56,6 +70,7 @@ export function DirectorListPage() {
           <tr>
             <th>ID</th>
             <th>Name</th>
+            <th />
           </tr>
         </thead>
         <tbody>
@@ -63,11 +78,21 @@ export function DirectorListPage() {
             <tr key={d.id}>
               <td>{d.id}</td>
               <td>{d.name}</td>
+              <td style={{ textAlign: 'right' }}>
+                <div className="actions" style={{ marginTop: 0, justifyContent: 'flex-end' }}>
+                  <Link to={`/crud/edit/director/${d.id}`}>
+                    <button disabled={loading}>Edit</button>
+                  </Link>
+                  <button onClick={() => void remove(d.id)} disabled={loading}>
+                    Delete
+                  </button>
+                </div>
+              </td>
             </tr>
           ))}
           {items.length === 0 && (
             <tr>
-              <td colSpan={2} className="muted">
+              <td colSpan={3} className="muted">
                 No directors yet.
               </td>
             </tr>

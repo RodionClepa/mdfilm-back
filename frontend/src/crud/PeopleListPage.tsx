@@ -31,6 +31,20 @@ export function PeopleListPage() {
     void refresh();
   }, []);
 
+  async function remove(id: number) {
+    if (!confirm(`Delete person #${id}?`)) return;
+    setError(null);
+    setLoading(true);
+    try {
+      await endpoints.people.delete(id);
+      await refresh();
+    } catch (e) {
+      setError(showError(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="panel">
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
@@ -56,6 +70,7 @@ export function PeopleListPage() {
           <tr>
             <th>ID</th>
             <th>Name</th>
+            <th />
           </tr>
         </thead>
         <tbody>
@@ -63,11 +78,21 @@ export function PeopleListPage() {
             <tr key={p.id}>
               <td>{p.id}</td>
               <td>{p.name}</td>
+              <td style={{ textAlign: 'right' }}>
+                <div className="actions" style={{ marginTop: 0, justifyContent: 'flex-end' }}>
+                  <Link to={`/crud/edit/person/${p.id}`}>
+                    <button disabled={loading}>Edit</button>
+                  </Link>
+                  <button onClick={() => void remove(p.id)} disabled={loading}>
+                    Delete
+                  </button>
+                </div>
+              </td>
             </tr>
           ))}
           {items.length === 0 && (
             <tr>
-              <td colSpan={2} className="muted">
+              <td colSpan={3} className="muted">
                 No people yet.
               </td>
             </tr>

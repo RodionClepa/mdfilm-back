@@ -24,6 +24,8 @@ export function MovieEditPage() {
     title: '',
     releaseDate: '',
     synopsis: '',
+    country: '',
+    posterImage: '',
     duration: '',
     budget: '',
   });
@@ -38,6 +40,8 @@ export function MovieEditPage() {
         title: m.title ?? '',
         releaseDate: toDateInput(m.releaseDate),
         synopsis: m.synopsis ?? '',
+        country: m.country ?? '',
+        posterImage: m.posterImage ?? '',
         duration: m.movieInfo?.duration != null ? String(m.movieInfo.duration) : '',
         budget: m.movieInfo?.budget != null ? String(m.movieInfo.budget) : '',
       });
@@ -60,6 +64,9 @@ export function MovieEditPage() {
       await endpoints.movies.update(id, {
         title: form.title || undefined,
         synopsis: form.synopsis || undefined,
+        country: form.country || undefined,
+        posterImage: form.posterImage || undefined,
+        releaseDate: form.releaseDate || undefined,
         duration: numOrUndefined(form.duration),
         budget: numOrUndefined(form.budget),
       });
@@ -96,7 +103,15 @@ export function MovieEditPage() {
           </div>
           <div className="row">
             <div className="muted">releaseDate</div>
-            <input type="date" value={form.releaseDate} onChange={(e) => setForm((f) => ({ ...f, releaseDate: e.target.value }))} disabled />
+            <input type="date" value={form.releaseDate} onChange={(e) => setForm((f) => ({ ...f, releaseDate: e.target.value }))} />
+          </div>
+          <div className="row">
+            <div className="muted">country</div>
+            <input value={form.country} onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))} placeholder="optional" />
+          </div>
+          <div className="row">
+            <div className="muted">posterImage</div>
+            <input value={form.posterImage} onChange={(e) => setForm((f) => ({ ...f, posterImage: e.target.value }))} placeholder="optional url" />
           </div>
           <div className="row">
             <div className="muted">duration</div>

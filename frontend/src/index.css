@@ -1,3 +1,7 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -11,6 +15,109 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.homepage-root,
+html.public-root,
+html.crud-root {
+  --bgColor: #f6f7fb;
+  --bgColorTint: #ffffff;
+  --textColor: #0b1220;
+  --textSecColor: rgba(11, 18, 32, 0.72);
+  --borderColor: rgba(11, 18, 32, 0.10);
+  --pink: #ff2d8d;
+  --pink-tint: rgba(255, 45, 141, 0.14);
+  --orange: #ff7a18;
+  --orange-tint: rgba(255, 122, 24, 0.14);
+  --red: #e53935;
+  --red-tint: rgba(229, 57, 53, 0.14);
+  --blue: #01b4e4;
+  --blue-tint: rgba(1, 180, 228, 0.18);
+  --purple: #7c4dff;
+  --purple-tint: rgba(124, 77, 255, 0.14);
+  --skeleton-color: rgba(11, 18, 32, 0.08);
+
+  color-scheme: light;
+  color: var(--textColor);
+  background-color: var(--bgColor);
+}
+
+@media (prefers-color-scheme: dark) {
+  html.homepage-root:not([data-theme='light']),
+  html.public-root:not([data-theme='light']),
+  html.crud-root:not([data-theme='light']) {
+    --bgColor: #0b1220;
+    --bgColorTint: rgba(255, 255, 255, 0.04);
+    --textColor: rgba(255, 255, 255, 0.92);
+    --textSecColor: rgba(255, 255, 255, 0.72);
+    --borderColor: rgba(255, 255, 255, 0.12);
+    --pink: #ff5aa7;
+    --pink-tint: rgba(255, 90, 167, 0.18);
+    --orange: #ff9b3d;
+    --orange-tint: rgba(255, 155, 61, 0.18);
+    --red: #ff4d4d;
+    --red-tint: rgba(255, 77, 77, 0.18);
+    --blue: #01b4e4;
+    --blue-tint: rgba(1, 180, 228, 0.20);
+    --purple: #9a7bff;
+    --purple-tint: rgba(154, 123, 255, 0.18);
+    --skeleton-color: rgba(255, 255, 255, 0.08);
+
+    color-scheme: dark;
+  }
+}
+
+html.homepage-root[data-theme='dark'],
+html.public-root[data-theme='dark'],
+html.crud-root[data-theme='dark'] {
+  --bgColor: #0b1220;
+  --bgColorTint: rgba(255, 255, 255, 0.04);
+  --textColor: rgba(255, 255, 255, 0.92);
+  --textSecColor: rgba(255, 255, 255, 0.72);
+  --borderColor: rgba(255, 255, 255, 0.12);
+  --pink: #ff5aa7;
+  --pink-tint: rgba(255, 90, 167, 0.18);
+  --orange: #ff9b3d;
+  --orange-tint: rgba(255, 155, 61, 0.18);
+  --red: #ff4d4d;
+  --red-tint: rgba(255, 77, 77, 0.18);
+  --blue: #01b4e4;
+  --blue-tint: rgba(1, 180, 228, 0.20);
+  --purple: #9a7bff;
+  --purple-tint: rgba(154, 123, 255, 0.18);
+  --skeleton-color: rgba(255, 255, 255, 0.08);
+
+  color-scheme: dark;
+}
+
+html.homepage-root[data-theme='light'],
+html.public-root[data-theme='light'],
+html.crud-root[data-theme='light'] {
+  color-scheme: light;
+}
+
+html.homepage-root body,
+html.public-root body,
+html.crud-root body {
+  background: var(--bgColor);
+  color: var(--textColor);
+}
+
+html.homepage-root a,
+html.public-root a,
+html.crud-root a {
+  color: var(--blue);
+}
+
+html.homepage-root a:hover,
+html.public-root a:hover,
+html.crud-root a:hover {
+  color: rgba(1, 180, 228, 0.85);
+}
+
+#root {
+  display: flex;
+  width: 100%;
 }
 
 a {

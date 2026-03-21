@@ -1,5 +1,17 @@
 export type MediaTypeName = 'MOVIE' | 'SERIES' | 'MEDIA' | string;
 
+export type Gender = 'MALE' | 'FEMALE' | 'UNSPECIFIED';
+
+export type Role = 'USER' | 'ADMIN';
+
+export interface User {
+  id: number;
+  email: string;
+  name?: string | null;
+  avatarUrl?: string | null;
+  role: Role;
+}
+
 export interface MediaType {
   id: number;
   name: string;
@@ -8,11 +20,23 @@ export interface MediaType {
 export interface Director {
   id: number;
   name: string;
+  earnings?: number | null;
+  biography?: string | null;
+  birthDate?: string | null;
+  gender?: Gender | null;
+  imageUrl?: string | null;
+  placeOfBirth?: string | null;
 }
 
 export interface Person {
   id: number;
   name: string;
+  earnings?: number | null;
+  biography?: string | null;
+  birthDate?: string | null;
+  gender?: Gender | null;
+  imageUrl?: string | null;
+  placeOfBirth?: string | null;
 }
 
 export interface MediaDirector {
@@ -58,6 +82,24 @@ export interface Media {
   cast?: MediaCast[];
   movieInfo?: MovieInfo | null;
   seriesInfo?: SeriesInfo | null;
+}
+
+export interface HomepageFeaturedMedia {
+  id: number;
+  mediaId: number;
+  position: number;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  media?: Media;
+}
+
+export interface Bookmark {
+  id: number;
+  userId: number;
+  mediaId: number;
+  createdAt: string;
+  media: Media;
 }
 
 export interface Season {

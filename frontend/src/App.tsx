@@ -13,17 +13,60 @@ import { SeriesDetailsPage } from './crud/SeriesDetailsPage';
 import { SeriesEditPage } from './crud/SeriesEditPage';
 import { SeriesListPage } from './crud/SeriesListPage';
 import { DirectorCreatePage } from './crud/DirectorCreatePage';
+import { DirectorEditPage } from './crud/DirectorEditPage';
 import { DirectorListPage } from './crud/DirectorListPage';
 import { PeopleListPage } from './crud/PeopleListPage';
 import { PersonCreatePage } from './crud/PersonCreatePage';
+import { PersonEditPage } from './crud/PersonEditPage';
+import { HomepageFeaturedPage } from './crud/HomepageFeaturedPage';
+import { MainPage } from './pages/MainPage';
+import { TitleDetailsPage } from './pages/TitleDetailsPage';
+import { ActorPage } from './pages/ActorPage';
+import { DirectorPage } from './pages/DirectorPage';
+import { LoginPage } from './pages/LoginPage';
+import { AdminLoginPage } from './pages/AdminLoginPage';
+import { AuthCallbackPage } from './pages/AuthCallbackPage';
+import { MoviesPage } from './pages/MoviesPage';
+import { SeriesPagePublic } from './pages/SeriesPagePublic';
+import { PeoplePagePublic } from './pages/PeoplePagePublic';
+import { SearchPage } from './pages/SearchPage';
+import { ProfileBookmarksPage } from './pages/ProfileBookmarksPage';
+import { RequireAdmin } from './auth/RequireAdmin';
+import { PublicLayout } from './layouts/PublicLayout';
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/crud" replace />} />
+      <Route path="/" element={<PublicLayout />}>
+        <Route index element={<MainPage />} />
 
-      <Route path="/crud" element={<CrudLayout />}>
+        <Route path="login" element={<LoginPage />} />
+        <Route path="admin/login" element={<AdminLoginPage />} />
+        <Route path="auth/callback" element={<AuthCallbackPage />} />
+
+        <Route path="movies" element={<MoviesPage />} />
+        <Route path="series" element={<SeriesPagePublic />} />
+        <Route path="people" element={<PeoplePagePublic />} />
+        <Route path="search" element={<SearchPage />} />
+
+        <Route path="profile/bookmarks" element={<ProfileBookmarksPage />} />
+
+        <Route path="title/:id" element={<TitleDetailsPage />} />
+        <Route path="actor/:id" element={<ActorPage />} />
+        <Route path="director/:id" element={<DirectorPage />} />
+      </Route>
+
+      <Route
+        path="/crud"
+        element={
+          <RequireAdmin>
+            <CrudLayout />
+          </RequireAdmin>
+        }
+      >
         <Route index element={<Navigate to="media" replace />} />
+
+        <Route path="homepage-featured" element={<HomepageFeaturedPage />} />
 
         <Route path="media" element={<MediaListPage />} />
         <Route path="create/media" element={<MediaCreatePage />} />
@@ -42,12 +85,14 @@ export default function App() {
 
         <Route path="directors" element={<DirectorListPage />} />
         <Route path="create/director" element={<DirectorCreatePage />} />
+        <Route path="edit/director/:id" element={<DirectorEditPage />} />
 
         <Route path="people" element={<PeopleListPage />} />
         <Route path="create/person" element={<PersonCreatePage />} />
+        <Route path="edit/person/:id" element={<PersonEditPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/crud" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

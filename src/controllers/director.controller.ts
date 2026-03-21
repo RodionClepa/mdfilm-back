@@ -28,6 +28,33 @@ class DirectorController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  async updateDirector(req: Request, res: Response) {
+    try {
+      const director = await directorService.update(Number(req.params.id), req.body);
+      res.json(director);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message ?? 'Update failed' });
+    }
+  }
+
+  async deleteDirector(req: Request, res: Response) {
+    try {
+      await directorService.delete(Number(req.params.id));
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(400).json({ error: error.message ?? 'Delete failed' });
+    }
+  }
+
+  async getDirectorFilmography(req: Request, res: Response) {
+    try {
+      const media = await directorService.getFilmography(Number(req.params.id));
+      res.json(media);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message ?? 'Failed to fetch filmography' });
+    }
+  }
 }
 
 export const directorController = new DirectorController();

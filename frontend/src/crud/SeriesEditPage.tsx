@@ -24,6 +24,8 @@ export function SeriesEditPage() {
     title: '',
     releaseDate: '',
     synopsis: '',
+    country: '',
+    posterImage: '',
     totalSeasons: '',
     status: '',
     firstAirDate: '',
@@ -40,6 +42,8 @@ export function SeriesEditPage() {
         title: s.title ?? '',
         releaseDate: toDateInput(s.releaseDate),
         synopsis: s.synopsis ?? '',
+        country: s.country ?? '',
+        posterImage: s.posterImage ?? '',
         totalSeasons: s.seriesInfo?.totalSeasons != null ? String(s.seriesInfo.totalSeasons) : '',
         status: s.seriesInfo?.status ?? '',
         firstAirDate: toDateInput(s.seriesInfo?.firstAirDate),
@@ -64,6 +68,8 @@ export function SeriesEditPage() {
       await endpoints.series.update(id, {
         title: form.title || undefined,
         synopsis: form.synopsis || undefined,
+        country: form.country || undefined,
+        posterImage: form.posterImage || undefined,
         totalSeasons: numOrUndefined(form.totalSeasons),
         status: form.status || undefined,
         firstAirDate: form.firstAirDate || undefined,
@@ -103,6 +109,14 @@ export function SeriesEditPage() {
           <div className="row">
             <div className="muted">releaseDate</div>
             <input type="date" value={form.releaseDate} disabled />
+          </div>
+          <div className="row">
+            <div className="muted">country</div>
+            <input value={form.country} onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))} placeholder="optional" />
+          </div>
+          <div className="row">
+            <div className="muted">posterImage</div>
+            <input value={form.posterImage} onChange={(e) => setForm((f) => ({ ...f, posterImage: e.target.value }))} placeholder="optional url" />
           </div>
           <div className="row">
             <div className="muted">firstAirDate</div>

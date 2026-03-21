@@ -73,8 +73,20 @@ export function SeriesCreatePage() {
         <input type="date" value={form.releaseDate} onChange={(e) => setForm((f) => ({ ...f, releaseDate: e.target.value }))} />
       </div>
       <div className="row">
+        <div className="muted">country</div>
+        <input value={form.country} onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))} placeholder="optional" />
+      </div>
+      <div className="row">
+        <div className="muted">posterImage</div>
+        <input value={form.posterImage} onChange={(e) => setForm((f) => ({ ...f, posterImage: e.target.value }))} placeholder="optional url" />
+      </div>
+      <div className="row">
         <div className="muted">firstAirDate</div>
         <input type="date" value={form.firstAirDate} onChange={(e) => setForm((f) => ({ ...f, firstAirDate: e.target.value }))} />
+      </div>
+      <div className="row">
+        <div className="muted">lastAirDate</div>
+        <input type="date" value={form.lastAirDate} onChange={(e) => setForm((f) => ({ ...f, lastAirDate: e.target.value }))} placeholder="optional" />
       </div>
       <div className="row">
         <div className="muted">totalSeasons</div>

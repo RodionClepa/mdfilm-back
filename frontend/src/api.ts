@@ -21,10 +21,12 @@ async function parseJsonSafe(res: Response) {
 }
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = localStorage.getItem('mdfilm-jwt') || '';
   const res = await fetch(path, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },
   });

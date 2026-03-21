@@ -31,6 +31,17 @@ model WatchLinkType {
   @@map("Watch_Link_Types")
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  UNSPECIFIED
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
 // --- Main Models ---
 
 model Media {
@@ -54,13 +65,23 @@ model Media {
   seasons     Season[]
   watchLinks  WatchLink[]
 
+  homepageFeatured HomepageFeaturedMedia[]
+
+  bookmarks Bookmark[]
+
   @@map("Media")
 }
 
 model Director {
-  id    Int     @id @default(autoincrement())
-  name  String
-  media MediaDirector[]
+  id           Int     @id @default(autoincrement())
+  name         String
+  earnings     Int?
+  biography    String?  @db.Text
+  birthDate    DateTime?
+  gender       Gender   @default(UNSPECIFIED)
+  imageUrl     String?
+  placeOfBirth String?
+  media        MediaDirector[]
 }
 
 model MediaDirector {
@@ -76,9 +97,15 @@ model MediaDirector {
 }
 
 model Person {
-  id    Int        @id @default(autoincrement())
-  name  String
-  cast  MediaCast[]
+  id           Int        @id @default(autoincrement())
+  name         String
+  earnings     Int?
+  biography    String?    @db.Text
+  birthDate    DateTime?
+  gender       Gender     @default(UNSPECIFIED)
+  imageUrl     String?
+  placeOfBirth String?
+  cast         MediaCast[]
 
   @@map("People")
 }
@@ -159,4 +186,48 @@ model WatchLink {
   episode   Episode?      @relation(fields: [episodeId], references: [id])
 
   @@map("Watch_Links")
+}
+
+model HomepageFeaturedMedia {
+  id        Int      @id @default(autoincrement())
+  mediaId   Int      @map("media_id")
+  position  Int
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  media     Media    @relation(fields: [mediaId], references: [id])
+
+  @@unique([mediaId])
+  @@index([enabled, position])
+  @@map("Homepage_Featured_Media")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  googleSub String   @unique
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookmarks Bookmark[]
+  @@map("Users")
+}
+
+model Bookmark {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  mediaId   Int      @map("media_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, mediaId])
+  @@index([userId, createdAt])
+  @@index([mediaId])
+  @@map("Bookmarks")
 }
