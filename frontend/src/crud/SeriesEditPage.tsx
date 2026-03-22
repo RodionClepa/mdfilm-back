@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ApiError } from '../api';
+import { api } from '../api';
 import { endpoints } from '../endpoints';
 import type { Media } from '../types';
-import { numOrUndefined, toDateInput } from './utils';
+import { TranslationTabs } from './TranslationTabs';
+import { buildTranslationsPayload, numOrUndefined, toDateInput } from './utils';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -19,6 +21,10 @@ export function SeriesEditPage() {
   const [item, setItem] = useState<Media | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [i18nEnabled, setI18nEnabled] = useState({ ro: false, ru: false });
+  const [i18nRo, setI18nRo] = useState({ title: '', synopsis: '' });
+  const [i18nRu, setI18nRu] = useState({ title: '', synopsis: '' });
 
   const [form, setForm] = useState({
     title: '',
@@ -36,7 +42,12 @@ export function SeriesEditPage() {
     setError(null);
     setLoading(true);
     try {
-      const s = await endpoints.series.get(id);
+      const [sEn, sRo, sRu] = await Promise.all([
+        endpoints.series.get(id),
+        api<Media>(`/api/series/${id}?lang=ro`),
+        api<Media>(`/api/series/${id}?lang=ru`),
+      ]);
+      const s = sEn;
       setItem(s);
       setForm({
         title: s.title ?? '',
@@ -49,6 +60,14 @@ export function SeriesEditPage() {
         firstAirDate: toDateInput(s.seriesInfo?.firstAirDate),
         lastAirDate: toDateInput(s.seriesInfo?.lastAirDate),
       });
+
+      const roTitle = sRo?.title ?? '';
+      const roSynopsis = sRo?.synopsis ?? '';
+      const ruTitle = sRu?.title ?? '';
+      const ruSynopsis = sRu?.synopsis ?? '';
+      setI18nRo({ title: roTitle, synopsis: roSynopsis });
+      setI18nRu({ title: ruTitle, synopsis: ruSynopsis });
+      setI18nEnabled({ ro: Boolean(roTitle.trim()), ru: Boolean(ruTitle.trim()) });
     } catch (e) {
       setError(showError(e));
     } finally {
@@ -65,7 +84,16 @@ export function SeriesEditPage() {
     setError(null);
     setLoading(true);
     try {
-      await endpoints.series.update(id, {
+      if (i18nEnabled.ro && !i18nRo.title.trim()) {
+        setError('RO translation title is required when RO is enabled');
+        return;
+      }
+      if (i18nEnabled.ru && !i18nRu.title.trim()) {
+        setError('RU translation title is required when RU is enabled');
+        return;
+      }
+
+      const payload: any = {
         title: form.title || undefined,
         synopsis: form.synopsis || undefined,
         country: form.country || undefined,
@@ -74,7 +102,11 @@ export function SeriesEditPage() {
         status: form.status || undefined,
         firstAirDate: form.firstAirDate || undefined,
         lastAirDate: form.lastAirDate || null,
-      });
+      };
+      const translations = buildTranslationsPayload(i18nEnabled, { ro: i18nRo, ru: i18nRu });
+      if (translations) payload.translations = translations;
+
+      await endpoints.series.update(id, payload);
       nav(`/crud/details/series/${id}`);
     } catch (e) {
       setError(showError(e));
@@ -102,10 +134,32 @@ export function SeriesEditPage() {
 
       {item && (
         <>
-          <div className="row">
-            <div className="muted">title</div>
-            <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-          </div>
+          <TranslationTabs
+            title="Translations"
+            fields={[
+              { key: 'title', label: 'title' },
+              { key: 'synopsis', label: 'synopsis', multiline: true },
+            ]}
+            requiredKeys={['title']}
+            en={{ title: form.title, synopsis: form.synopsis }}
+            ro={i18nRo}
+            ru={i18nRu}
+            enabled={i18nEnabled}
+            onChangeEn={(next) =>
+              setForm((f) => ({
+                ...f,
+                title: String(next.title ?? ''),
+                synopsis: String(next.synopsis ?? ''),
+              }))
+            }
+            onChangeRo={(next) =>
+              setI18nRo({ title: String(next.title ?? ''), synopsis: String(next.synopsis ?? '') })
+            }
+            onChangeRu={(next) =>
+              setI18nRu({ title: String(next.title ?? ''), synopsis: String(next.synopsis ?? '') })
+            }
+            onChangeEnabled={setI18nEnabled}
+          />
           <div className="row">
             <div className="muted">releaseDate</div>
             <input type="date" value={form.releaseDate} disabled />
@@ -133,10 +187,6 @@ export function SeriesEditPage() {
           <div className="row">
             <div className="muted">status</div>
             <input value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))} />
-          </div>
-          <div className="row">
-            <div className="muted">synopsis</div>
-            <textarea value={form.synopsis} onChange={(e) => setForm((f) => ({ ...f, synopsis: e.target.value }))} />
           </div>
 
           <div className="actions">

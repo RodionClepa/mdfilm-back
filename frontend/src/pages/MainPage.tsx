@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiError } from '../api';
-import { endpoints } from '../endpoints';
+import { publicEndpoints } from '../publicEndpoints';
 import type { Media } from '../types';
 import '../App.css';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -11,6 +11,7 @@ import 'swiper/css/effect-coverflow';
 import 'swiper/css/scrollbar';
 import { useBookmarks } from '../bookmarks/useBookmarks';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
+import { usePublicLang } from '../publicLang';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -113,6 +114,8 @@ export function MainPage() {
   const [error, setError] = useState<string | null>(null);
   const prevThemeRef = useRef<string | undefined>(undefined);
 
+  const { lang } = usePublicLang();
+
   const bookmarkMediaIds = useMemo(() => {
     const ids = [
       ...featured.map((m) => m.id),
@@ -131,11 +134,11 @@ export function MainPage() {
     setLoading(true);
     try {
       const [f, lm, ls, um, us] = await Promise.all([
-        endpoints.homepage.featured(),
-        endpoints.homepage.latestMovies(),
-        endpoints.homepage.latestSeries(),
-        endpoints.homepage.upcomingMovies(),
-        endpoints.homepage.upcomingSeries(),
+        publicEndpoints.homepage.featured(lang),
+        publicEndpoints.homepage.latestMovies(lang),
+        publicEndpoints.homepage.latestSeries(lang),
+        publicEndpoints.homepage.upcomingMovies(lang),
+        publicEndpoints.homepage.upcomingSeries(lang),
       ]);
       setFeatured(f);
       setLatestMovies(lm);
@@ -152,7 +155,6 @@ export function MainPage() {
   useEffect(() => {
     prevThemeRef.current = document.documentElement.dataset.theme;
     document.documentElement.classList.add('homepage-root');
-    void refresh();
     return () => {
       document.documentElement.classList.remove('homepage-root');
       const prevTheme = prevThemeRef.current;
@@ -160,6 +162,10 @@ export function MainPage() {
       else delete document.documentElement.dataset.theme;
     };
   }, []);
+
+  useEffect(() => {
+    void refresh();
+  }, [lang]);
 
   return (
     <div className="app homepage">

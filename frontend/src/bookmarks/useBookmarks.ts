@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError } from '../api';
 import { endpoints } from '../endpoints';
 
@@ -17,21 +17,42 @@ export type BookmarksState = {
 };
 
 export function useBookmarks(mediaIds: number[]): BookmarksState {
-  const idsKey = useMemo(() => Array.from(new Set(mediaIds.filter((n) => Number.isFinite(n) && n > 0))).sort((a, b) => a - b), [mediaIds]);
+  function normalizeIds(ids: number[]) {
+    const uniq = Array.from(new Set(ids.filter((n) => Number.isFinite(n) && n > 0))).sort((a, b) => a - b);
+    return {
+      key: uniq.join(','),
+      ids: uniq,
+    };
+  }
+
+  const idsStableRef = useRef<{ key: string; ids: number[] }>(normalizeIds(mediaIds));
+  const nextNormalized = normalizeIds(mediaIds);
+  if (nextNormalized.key !== idsStableRef.current.key) {
+    idsStableRef.current = nextNormalized;
+  }
+
+  const idsKey = idsStableRef.current.key;
+  const idsArr = idsStableRef.current.ids;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<number>>(() => new Set());
 
-  const idsRef = useRef<number[]>(idsKey);
+  const authBlockedRef = useRef(false);
+
+  const idsRef = useRef<number[]>(idsArr);
   useEffect(() => {
-    idsRef.current = idsKey;
-  }, [idsKey]);
+    idsRef.current = idsArr;
+  }, [idsArr]);
 
   const loggedIn = hasJwt();
 
   const refresh = useCallback(async (ids: number[]) => {
     setError(null);
+    if (authBlockedRef.current) {
+      setBookmarkedIds(new Set());
+      return;
+    }
     if (!hasJwt()) {
       setBookmarkedIds(new Set());
       return;
@@ -50,10 +71,12 @@ export function useBookmarks(mediaIds: number[]): BookmarksState {
       if (e instanceof ApiError && e.status === 401) {
         localStorage.removeItem('mdfilm-jwt');
         setBookmarkedIds(new Set());
+        authBlockedRef.current = true;
         return;
       }
       if (e instanceof ApiError && (e.status === 403 || e.status === 401)) {
         setBookmarkedIds(new Set());
+        authBlockedRef.current = true;
         return;
       }
       setError(e instanceof Error ? e.message : 'Failed to load bookmarks');
@@ -63,7 +86,8 @@ export function useBookmarks(mediaIds: number[]): BookmarksState {
   }, []);
 
   useEffect(() => {
-    void refresh(idsKey);
+    authBlockedRef.current = false;
+    void refresh(idsArr);
   }, [idsKey, refresh]);
 
   const isBookmarked = useCallback((mediaId: number) => bookmarkedIds.has(mediaId), [bookmarkedIds]);

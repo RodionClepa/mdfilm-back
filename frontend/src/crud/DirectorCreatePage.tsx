@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ApiError } from '../api';
 import { endpoints } from '../endpoints';
 import type { Gender } from '../types';
+import { TranslationTabs } from './TranslationTabs';
+import { buildTranslationsPayload } from './utils';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -22,11 +24,28 @@ export function DirectorCreatePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [i18nEnabled, setI18nEnabled] = useState({ ro: false, ru: false });
+  const [i18nRo, setI18nRo] = useState({ name: '', biography: '' });
+  const [i18nRu, setI18nRu] = useState({ name: '', biography: '' });
+
   async function onSubmit() {
     setError(null);
     setLoading(true);
     try {
-      await endpoints.directors.create({
+      if (!name.trim()) {
+        setError('Name is required');
+        return;
+      }
+      if (i18nEnabled.ro && !i18nRo.name.trim()) {
+        setError('RO translation name is required when RO is enabled');
+        return;
+      }
+      if (i18nEnabled.ru && !i18nRu.name.trim()) {
+        setError('RU translation name is required when RU is enabled');
+        return;
+      }
+
+      const payload: any = {
         name,
         earnings,
         biography,
@@ -34,7 +53,11 @@ export function DirectorCreatePage() {
         gender,
         imageUrl,
         placeOfBirth,
-      });
+      };
+      const translations = buildTranslationsPayload(i18nEnabled, { ro: i18nRo, ru: i18nRu });
+      if (translations) payload.translations = translations;
+
+      await endpoints.directors.create(payload);
       nav('/crud/directors');
     } catch (e) {
       setError(showError(e));
@@ -56,10 +79,29 @@ export function DirectorCreatePage() {
 
       {error && <div className="error">{error}</div>}
 
-      <div className="row">
-        <div className="muted">name</div>
-        <input value={name} onChange={(e) => setName(e.target.value)} />
-      </div>
+      <TranslationTabs
+        title="Translations"
+        fields={[
+          { key: 'name', label: 'name' },
+          { key: 'biography', label: 'biography', multiline: true },
+        ]}
+        requiredKeys={['name']}
+        en={{ name, biography }}
+        ro={i18nRo}
+        ru={i18nRu}
+        enabled={i18nEnabled}
+        onChangeEn={(next) => {
+          setName(String(next.name ?? ''));
+          setBiography(String(next.biography ?? ''));
+        }}
+        onChangeRo={(next) =>
+          setI18nRo({ name: String(next.name ?? ''), biography: String(next.biography ?? '') })
+        }
+        onChangeRu={(next) =>
+          setI18nRu({ name: String(next.name ?? ''), biography: String(next.biography ?? '') })
+        }
+        onChangeEnabled={setI18nEnabled}
+      />
 
       <div className="row">
         <div className="muted">earnings</div>
@@ -107,11 +149,6 @@ export function DirectorCreatePage() {
           />
         </div>
       )}
-
-      <div className="row">
-        <div className="muted">biography</div>
-        <textarea value={biography} onChange={(e) => setBiography(e.target.value)} rows={6} />
-      </div>
 
       <div className="actions">
         <button onClick={() => void onSubmit()} disabled={loading}>

@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ApiError } from '../api';
 import { endpoints } from '../endpoints';
+import { publicEndpoints } from '../publicEndpoints';
 import type { Bookmark } from '../types';
 import '../App.css';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
+import { usePublicLang } from '../publicLang';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -17,6 +19,8 @@ type Sort = 'createdAt_desc' | 'createdAt_asc' | 'title_asc' | 'title_desc';
 export function ProfileBookmarksPage() {
   const nav = useNavigate();
   const [sp, setSp] = useSearchParams();
+
+  const { lang } = usePublicLang();
 
   const typeParam = sp.get('type') || '';
   const qParam = sp.get('q') || '';
@@ -40,7 +44,7 @@ export function ProfileBookmarksPage() {
     setError(null);
     setLoading(true);
     try {
-      const rows = await endpoints.bookmarks.list({
+      const rows = await publicEndpoints.bookmarks.list(lang, {
         type: type ? (type as 'MOVIE' | 'SERIES') : undefined,
         q: q.trim() ? q.trim() : undefined,
         sort,
@@ -64,7 +68,7 @@ export function ProfileBookmarksPage() {
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, q, sort]);
+  }, [type, q, sort, lang]);
 
   async function removeBookmark(mediaId: number) {
     setError(null);

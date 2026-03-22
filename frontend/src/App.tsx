@@ -19,6 +19,9 @@ import { PeopleListPage } from './crud/PeopleListPage';
 import { PersonCreatePage } from './crud/PersonCreatePage';
 import { PersonEditPage } from './crud/PersonEditPage';
 import { HomepageFeaturedPage } from './crud/HomepageFeaturedPage';
+import { NewsCreatePage } from './crud/NewsCreatePage';
+import { NewsEditPage } from './crud/NewsEditPage';
+import { NewsListPage } from './crud/NewsListPage';
 import { MainPage } from './pages/MainPage';
 import { TitleDetailsPage } from './pages/TitleDetailsPage';
 import { ActorPage } from './pages/ActorPage';
@@ -31,13 +34,23 @@ import { SeriesPagePublic } from './pages/SeriesPagePublic';
 import { PeoplePagePublic } from './pages/PeoplePagePublic';
 import { SearchPage } from './pages/SearchPage';
 import { ProfileBookmarksPage } from './pages/ProfileBookmarksPage';
+import { NewsPage } from './pages/NewsPage';
+import { NewsDetailsPage } from './pages/NewsDetailsPage';
 import { RequireAdmin } from './auth/RequireAdmin';
 import { PublicLayout } from './layouts/PublicLayout';
+import { PublicLangProvider } from './publicLang';
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<PublicLayout />}>
+      <Route
+        path="/"
+        element={
+          <PublicLangProvider>
+            <PublicLayout />
+          </PublicLangProvider>
+        }
+      >
         <Route index element={<MainPage />} />
 
         <Route path="login" element={<LoginPage />} />
@@ -46,6 +59,8 @@ export default function App() {
 
         <Route path="movies" element={<MoviesPage />} />
         <Route path="series" element={<SeriesPagePublic />} />
+        <Route path="news" element={<NewsPage />} />
+        <Route path="news/:slug" element={<NewsDetailsPage />} />
         <Route path="people" element={<PeoplePagePublic />} />
         <Route path="search" element={<SearchPage />} />
 
@@ -90,6 +105,10 @@ export default function App() {
         <Route path="people" element={<PeopleListPage />} />
         <Route path="create/person" element={<PersonCreatePage />} />
         <Route path="edit/person/:id" element={<PersonEditPage />} />
+
+        <Route path="news" element={<NewsListPage />} />
+        <Route path="create/news" element={<NewsCreatePage />} />
+        <Route path="edit/news/:id" element={<NewsEditPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

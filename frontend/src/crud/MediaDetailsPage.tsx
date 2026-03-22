@@ -3,7 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import { ApiError } from '../api';
 import { endpoints } from '../endpoints';
 import type { Media, MediaCast, MediaDirector, Director, Person } from '../types';
-import { toDateInput } from './utils';
+import { TranslationTabs } from './TranslationTabs';
+import { buildTranslationsPayload, toDateInput } from './utils';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -29,6 +30,26 @@ export function MediaDetailsPage() {
     characterName: '',
     billingOrder: '',
   });
+
+  const [castI18nEnabled, setCastI18nEnabled] = useState({ ro: false, ru: false });
+  const [castI18nRo, setCastI18nRo] = useState<{ characterName: string }>({ characterName: '' });
+  const [castI18nRu, setCastI18nRu] = useState<{ characterName: string }>({ characterName: '' });
+
+  async function loadCastI18nForPerson(personId: number) {
+    const [castRo, castRu] = await Promise.all([
+      endpoints.media.cast.list(id, { lang: 'ro' }),
+      endpoints.media.cast.list(id, { lang: 'ru' }),
+    ]);
+    const roRow = castRo.find((c) => c.personId === personId);
+    const ruRow = castRu.find((c) => c.personId === personId);
+
+    const roName = String(roRow?.characterName ?? '').trim();
+    const ruName = String(ruRow?.characterName ?? '').trim();
+
+    setCastI18nRo({ characterName: roName });
+    setCastI18nRu({ characterName: ruName });
+    setCastI18nEnabled({ ro: Boolean(roName), ru: Boolean(ruName) });
+  }
 
   async function load() {
     setError(null);
@@ -101,14 +122,39 @@ export function MediaDetailsPage() {
         personId: Number(castForm.personId),
         characterName: castForm.characterName || undefined,
         billingOrder: castForm.billingOrder ? Number(castForm.billingOrder) : undefined,
+        translations: buildTranslationsPayload(castI18nEnabled, {
+          ro: { characterName: castI18nRo.characterName },
+          ru: { characterName: castI18nRu.characterName },
+        }),
       });
       setCastForm({ personId: '', characterName: '', billingOrder: '' });
+      setCastI18nEnabled({ ro: false, ru: false });
+      setCastI18nRo({ characterName: '' });
+      setCastI18nRu({ characterName: '' });
       setSuccess('Cast member attached.');
       await load();
     } catch (e) {
       setError(showError(e));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function editCastMember(pid: number) {
+    const row = cast.find((c) => c.personId === pid);
+    if (!row) return;
+    setCastForm({
+      personId: String(pid),
+      characterName: String(row.characterName ?? ''),
+      billingOrder: row.billingOrder != null ? String(row.billingOrder) : '',
+    });
+    setCastI18nEnabled({ ro: false, ru: false });
+    setCastI18nRo({ characterName: '' });
+    setCastI18nRu({ characterName: '' });
+    try {
+      await loadCastI18nForPerson(pid);
+    } catch (e) {
+      setError(showError(e));
     }
   }
 
@@ -292,6 +338,22 @@ export function MediaDetailsPage() {
                 }
               />
             </div>
+
+            <TranslationTabs
+              title="Cast role translations"
+              fields={[{ key: 'characterName', label: 'characterName' }]}
+              en={{ characterName: castForm.characterName }}
+              ro={castI18nRo}
+              ru={castI18nRu}
+              enabled={castI18nEnabled}
+              onChangeEn={(next) =>
+                setCastForm((f) => ({ ...f, characterName: String(next.characterName ?? '') }))
+              }
+              onChangeRo={(next) => setCastI18nRo({ characterName: String(next.characterName ?? '') })}
+              onChangeRu={(next) => setCastI18nRu({ characterName: String(next.characterName ?? '') })}
+              onChangeEnabled={setCastI18nEnabled}
+            />
+
             <div className="actions">
               <button onClick={() => void addCast()} disabled={loading}>
                 Attach cast member
@@ -316,6 +378,9 @@ export function MediaDetailsPage() {
                     <td>{c.characterName ?? '-'}</td>
                     <td>{c.billingOrder ?? '-'}</td>
                     <td>
+                      <button onClick={() => void editCastMember(c.personId)} disabled={loading}>
+                        Edit
+                      </button>
                       <button onClick={() => void removeCastMember(c.personId)} disabled={loading}>
                         Remove
                       </button>

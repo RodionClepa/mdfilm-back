@@ -5,11 +5,12 @@ import { Scrollbar } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/scrollbar';
 import { ApiError } from '../api';
-import { endpoints } from '../endpoints';
+import { publicEndpoints } from '../publicEndpoints';
 import type { Director, Gender, Media } from '../types';
 import '../App.css';
 import { useBookmarks } from '../bookmarks/useBookmarks';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
+import { usePublicLang } from '../publicLang';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -70,6 +71,8 @@ export function DirectorPage() {
   const params = useParams();
   const id = Number(params.id);
 
+  const { lang } = usePublicLang();
+
   const [item, setItem] = useState<Director | null>(null);
   const [media, setMedia] = useState<Media[]>([]);
   const [loading, setLoading] = useState(false);
@@ -83,7 +86,10 @@ export function DirectorPage() {
     setAvatarOk(true);
     setLoading(true);
     try {
-      const [d, m] = await Promise.all([endpoints.directors.get(id), endpoints.directors.filmography(id)]);
+      const [d, m] = await Promise.all([
+        publicEndpoints.directors.get(id, lang),
+        publicEndpoints.directors.filmography(id, lang),
+      ]);
       setItem(d);
       setMedia(m);
     } catch (e) {
@@ -96,7 +102,7 @@ export function DirectorPage() {
   useEffect(() => {
     if (Number.isFinite(id)) void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, lang]);
 
   return (
     <div className="app profile-page">

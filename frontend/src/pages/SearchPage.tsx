@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ApiError } from '../api';
-import { endpoints } from '../endpoints';
+import { publicEndpoints } from '../publicEndpoints';
 import type { Media, Person } from '../types';
 import '../App.css';
 import { useBookmarks } from '../bookmarks/useBookmarks';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
+import { usePublicLang } from '../publicLang';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -26,11 +27,13 @@ export function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { lang } = usePublicLang();
+
   async function load() {
     setError(null);
     setLoading(true);
     try {
-      const [m, p] = await Promise.all([endpoints.media.list(), endpoints.people.list()]);
+      const [m, p] = await Promise.all([publicEndpoints.media.list(lang), publicEndpoints.people.list(lang)]);
       setMedia(m);
       setPeople(p);
     } catch (e) {
@@ -42,7 +45,7 @@ export function SearchPage() {
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [lang]);
 
   const results = useMemo(() => {
     if (!q) return { media: [], people: [] };

@@ -760,6 +760,29 @@
   color: var(--textColor);
 }
 
+.public-lang-select {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--borderColor);
+  background: var(--bgColorTint);
+  color: var(--textColor);
+}
+
+.public-lang-select option {
+  background: var(--bgColor);
+  color: var(--textColor);
+}
+
+[data-theme='light'] .public-lang-select {
+  background: var(--bgColor);
+  color: var(--textColor);
+}
+
+[data-theme='light'] .public-lang-select option {
+  background: var(--bgColorTint);
+  color: var(--textColor);
+}
+
 .public-icon-btn {
   padding: 8px 10px;
   border-radius: 12px;

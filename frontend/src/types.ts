@@ -102,6 +102,29 @@ export interface Bookmark {
   media: Media;
 }
 
+export interface NewsI18n {
+  id: number;
+  newsId: number;
+  locale: 'en' | 'ro' | 'ru' | string;
+  title: string;
+  excerpt?: string | null;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface News {
+  id: number;
+  slug: string;
+  coverImageUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  translations?: NewsI18n[];
+  title?: string;
+  excerpt?: string | null;
+  content?: string;
+}
+
 export interface Season {
   id: number;
   mediaId: number;

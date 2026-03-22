@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ApiError } from '../api';
-import { endpoints } from '../endpoints';
+import { publicEndpoints } from '../publicEndpoints';
 import type { Media, MediaCast, MediaDirector } from '../types';
 import '../App.css';
+import { usePublicLang } from '../publicLang';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -24,6 +25,8 @@ export function TitleDetailsPage() {
   const params = useParams();
   const id = Number(params.id);
 
+  const { lang } = usePublicLang();
+
   const [item, setItem] = useState<Media | null>(null);
   const [directors, setDirectors] = useState<MediaDirector[]>([]);
   const [cast, setCast] = useState<MediaCast[]>([]);
@@ -35,9 +38,9 @@ export function TitleDetailsPage() {
     setLoading(true);
     try {
       const [m, ds, cs] = await Promise.all([
-        endpoints.media.get(id),
-        endpoints.media.directors.list(id),
-        endpoints.media.cast.list(id),
+        publicEndpoints.media.get(id, lang),
+        publicEndpoints.media.directors.list(id, lang),
+        publicEndpoints.media.cast.list(id, lang),
       ]);
       setItem(m);
       setDirectors(ds);
@@ -52,7 +55,7 @@ export function TitleDetailsPage() {
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, lang]);
 
   const title = item?.title ?? 'Title';
   const type = item?.type?.name ?? '—';

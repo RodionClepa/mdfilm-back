@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { Episode, Media, MediaCast, MediaDirector, Person, Season, Director, HomepageFeaturedMedia, User, Bookmark } from './types';
+import type { Episode, Media, MediaCast, MediaDirector, Person, Season, Director, HomepageFeaturedMedia, User, Bookmark, News } from './types';
 
 export const endpoints = {
   auth: {
@@ -68,10 +68,20 @@ export const endpoints = {
     },
 
     cast: {
-      list: (mediaId: number) => api<MediaCast[]>(`/api/media/${mediaId}/cast`),
+      list: (mediaId: number, params?: { lang?: 'en' | 'ro' | 'ru' }) => {
+        const sp = new URLSearchParams();
+        if (params?.lang) sp.set('lang', params.lang);
+        const qs = sp.toString();
+        return api<MediaCast[]>(`/api/media/${mediaId}/cast${qs ? `?${qs}` : ''}`);
+      },
       add: (
         mediaId: number,
-        data: { personId: number; characterName?: string; billingOrder?: number },
+        data: {
+          personId: number;
+          characterName?: string;
+          billingOrder?: number;
+          translations?: Array<{ locale: 'ro' | 'ru'; characterName?: string }>;
+        },
       ) =>
         api<Media>(`/api/media/${mediaId}/cast`, {
           method: 'POST',
@@ -79,7 +89,12 @@ export const endpoints = {
         }),
       replace: (
         mediaId: number,
-        cast: Array<{ personId: number; characterName?: string; billingOrder?: number }>,
+        cast: Array<{
+          personId: number;
+          characterName?: string;
+          billingOrder?: number;
+          translations?: Array<{ locale: 'ro' | 'ru'; characterName?: string }>;
+        }>,
       ) =>
         api<Media>(`/api/media/${mediaId}/cast`, {
           method: 'PUT',
@@ -160,6 +175,29 @@ export const endpoints = {
     update: (id: number, data: any) =>
       api<Person>(`/api/people/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: number) => api<void>(`/api/people/${id}`, { method: 'DELETE' }),
+  },
+
+  news: {
+    list: (params?: { lang?: 'en' | 'ro' | 'ru' }) => {
+      const sp = new URLSearchParams();
+      if (params?.lang) sp.set('lang', params.lang);
+      const qs = sp.toString();
+      return api<News[]>(`/api/news${qs ? `?${qs}` : ''}`);
+    },
+    getBySlug: (slug: string, params?: { lang?: 'en' | 'ro' | 'ru' }) => {
+      const sp = new URLSearchParams();
+      if (params?.lang) sp.set('lang', params.lang);
+      const qs = sp.toString();
+      return api<News>(`/api/news/${encodeURIComponent(slug)}${qs ? `?${qs}` : ''}`);
+    },
+
+    adminList: () => api<News[]>('/api/news/admin'),
+    adminGet: (id: number) => api<News>(`/api/news/admin/${id}`),
+    adminCreate: (data: any) =>
+      api<News>('/api/news/admin', { method: 'POST', body: JSON.stringify(data) }),
+    adminUpdate: (id: number, data: any) =>
+      api<News>(`/api/news/admin/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    adminDelete: (id: number) => api<void>(`/api/news/admin/${id}`, { method: 'DELETE' }),
   },
 };
 

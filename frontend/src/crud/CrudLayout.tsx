@@ -80,6 +80,11 @@ export function CrudLayout() {
               <button className={isActive ? 'active' : ''}>People</button>
             )}
           </NavLink>
+          <NavLink to="/crud/news">
+            {({ isActive }) => (
+              <button className={isActive ? 'active' : ''}>News</button>
+            )}
+          </NavLink>
         </div>
       </div>
 

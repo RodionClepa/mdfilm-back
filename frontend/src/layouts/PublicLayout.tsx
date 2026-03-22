@@ -1,10 +1,12 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { UserMenu } from '../auth/UserMenu';
+import { usePublicLang } from '../publicLang';
 import '../App.css';
 
 export function PublicLayout() {
   const nav = useNavigate();
+  const { lang, setLang } = usePublicLang();
 
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('homepage-theme');
@@ -58,6 +60,9 @@ export function PublicLayout() {
               <NavLink to="/series" className={({ isActive }) => (isActive ? 'active' : '')}>
                 Series
               </NavLink>
+              <NavLink to="/news" className={({ isActive }) => (isActive ? 'active' : '')}>
+                News
+              </NavLink>
               <NavLink to="/people" className={({ isActive }) => (isActive ? 'active' : '')}>
                 People
               </NavLink>
@@ -73,6 +78,18 @@ export function PublicLayout() {
                 aria-label="Search"
               />
             </form>
+
+            <select
+              value={lang}
+              onChange={(e) => setLang(e.target.value as any)}
+              aria-label="Language"
+              className="public-lang-select"
+              title="Language"
+            >
+              <option value="en">EN</option>
+              <option value="ro">RO</option>
+              <option value="ru">RU</option>
+            </select>
 
             <button
               className="public-icon-btn"

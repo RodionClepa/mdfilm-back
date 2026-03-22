@@ -5,11 +5,12 @@ import { Scrollbar } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/scrollbar';
 import { ApiError } from '../api';
-import { endpoints } from '../endpoints';
+import { publicEndpoints } from '../publicEndpoints';
 import type { Gender, Media, Person } from '../types';
 import '../App.css';
 import { useBookmarks } from '../bookmarks/useBookmarks';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
+import { usePublicLang } from '../publicLang';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -70,6 +71,8 @@ export function ActorPage() {
   const params = useParams();
   const id = Number(params.id);
 
+  const { lang } = usePublicLang();
+
   const [item, setItem] = useState<Person | null>(null);
   const [media, setMedia] = useState<Media[]>([]);
   const [loading, setLoading] = useState(false);
@@ -83,7 +86,10 @@ export function ActorPage() {
     setAvatarOk(true);
     setLoading(true);
     try {
-      const [p, m] = await Promise.all([endpoints.people.get(id), endpoints.people.filmography(id)]);
+      const [p, m] = await Promise.all([
+        publicEndpoints.people.get(id, lang),
+        publicEndpoints.people.filmography(id, lang),
+      ]);
       setItem(p);
       setMedia(m);
     } catch (e) {
@@ -96,7 +102,7 @@ export function ActorPage() {
   useEffect(() => {
     if (Number.isFinite(id)) void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, lang]);
 
   return (
     <div className="app profile-page">

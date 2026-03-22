@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiError } from '../api';
-import { endpoints } from '../endpoints';
+import { publicEndpoints } from '../publicEndpoints';
 import type { Media } from '../types';
 import '../App.css';
 import { useBookmarks } from '../bookmarks/useBookmarks';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
+import { usePublicLang } from '../publicLang';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -18,13 +19,15 @@ export function SeriesPagePublic() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { lang } = usePublicLang();
+
   const bookmarks = useBookmarks(items.map((m) => m.id));
 
   async function load() {
     setError(null);
     setLoading(true);
     try {
-      const data = await endpoints.series.list();
+      const data = await publicEndpoints.series.list(lang);
       setItems(data);
     } catch (e) {
       setError(showError(e));
@@ -35,7 +38,7 @@ export function SeriesPagePublic() {
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [lang]);
 
   return (
     <div className="app public-list">

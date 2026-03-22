@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApiError } from '../api';
 import { endpoints } from '../endpoints';
-import { numOrUndefined } from './utils';
+import { TranslationTabs } from './TranslationTabs';
+import { buildTranslationsPayload, numOrUndefined } from './utils';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -14,6 +15,11 @@ export function SeriesCreatePage() {
   const nav = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [i18nEnabled, setI18nEnabled] = useState({ ro: false, ru: false });
+  const [i18nRo, setI18nRo] = useState({ title: '', synopsis: '' });
+  const [i18nRu, setI18nRu] = useState({ title: '', synopsis: '' });
+
   const [form, setForm] = useState({
     title: '',
     releaseDate: '',
@@ -31,7 +37,20 @@ export function SeriesCreatePage() {
     setError(null);
     setLoading(true);
     try {
-      const created = await endpoints.series.create({
+      if (!form.title.trim()) {
+        setError('Title is required');
+        return;
+      }
+      if (i18nEnabled.ro && !i18nRo.title.trim()) {
+        setError('RO translation title is required when RO is enabled');
+        return;
+      }
+      if (i18nEnabled.ru && !i18nRu.title.trim()) {
+        setError('RU translation title is required when RU is enabled');
+        return;
+      }
+
+      const payload: any = {
         title: form.title,
         releaseDate: form.releaseDate,
         synopsis: form.synopsis || undefined,
@@ -42,7 +61,12 @@ export function SeriesCreatePage() {
         status: form.status || undefined,
         firstAirDate: form.firstAirDate || undefined,
         lastAirDate: form.lastAirDate || null,
-      });
+      };
+
+      const translations = buildTranslationsPayload(i18nEnabled, { ro: i18nRo, ru: i18nRu });
+      if (translations) payload.translations = translations;
+
+      const created = await endpoints.series.create(payload);
       nav(`/crud/details/series/${created.id}`);
     } catch (e) {
       setError(showError(e));
@@ -64,10 +88,28 @@ export function SeriesCreatePage() {
 
       {error && <div className="error">{error}</div>}
 
-      <div className="row">
-        <div className="muted">title</div>
-        <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-      </div>
+      <TranslationTabs
+        title="Translations"
+        fields={[
+          { key: 'title', label: 'title' },
+          { key: 'synopsis', label: 'synopsis', multiline: true },
+        ]}
+        requiredKeys={['title']}
+        en={{ title: form.title, synopsis: form.synopsis }}
+        ro={i18nRo}
+        ru={i18nRu}
+        enabled={i18nEnabled}
+        onChangeEn={(next) =>
+          setForm((f) => ({
+            ...f,
+            title: String(next.title ?? ''),
+            synopsis: String(next.synopsis ?? ''),
+          }))
+        }
+        onChangeRo={(next) => setI18nRo({ title: String(next.title ?? ''), synopsis: String(next.synopsis ?? '') })}
+        onChangeRu={(next) => setI18nRu({ title: String(next.title ?? ''), synopsis: String(next.synopsis ?? '') })}
+        onChangeEnabled={setI18nEnabled}
+      />
       <div className="row">
         <div className="muted">releaseDate</div>
         <input type="date" value={form.releaseDate} onChange={(e) => setForm((f) => ({ ...f, releaseDate: e.target.value }))} />
@@ -99,10 +141,6 @@ export function SeriesCreatePage() {
       <div className="row">
         <div className="muted">directorId</div>
         <input value={form.directorId} onChange={(e) => setForm((f) => ({ ...f, directorId: e.target.value }))} placeholder="optional (number)" />
-      </div>
-      <div className="row">
-        <div className="muted">synopsis</div>
-        <textarea value={form.synopsis} onChange={(e) => setForm((f) => ({ ...f, synopsis: e.target.value }))} />
       </div>
 
       <div className="actions">

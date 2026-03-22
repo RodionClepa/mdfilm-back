@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ApiError } from '../api';
 import { endpoints } from '../endpoints';
 import type { MediaTypeName } from '../types';
-import { numOrUndefined } from './utils';
+import { TranslationTabs } from './TranslationTabs';
+import { buildTranslationsPayload, numOrUndefined } from './utils';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -15,6 +16,10 @@ export function MediaCreatePage() {
   const nav = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [i18nEnabled, setI18nEnabled] = useState({ ro: false, ru: false });
+  const [i18nRo, setI18nRo] = useState({ title: '', synopsis: '' });
+  const [i18nRu, setI18nRu] = useState({ title: '', synopsis: '' });
 
   const [form, setForm] = useState({
     typeName: 'MEDIA' as MediaTypeName,
@@ -38,6 +43,19 @@ export function MediaCreatePage() {
     setError(null);
     setLoading(true);
     try {
+      if (!form.title.trim()) {
+        setError('Title is required');
+        return;
+      }
+      if (i18nEnabled.ro && !i18nRo.title.trim()) {
+        setError("RO translation title is required when RO is enabled");
+        return;
+      }
+      if (i18nEnabled.ru && !i18nRu.title.trim()) {
+        setError("RU translation title is required when RU is enabled");
+        return;
+      }
+
       const payload: any = {
         typeName: form.typeName,
         title: form.title,
@@ -47,6 +65,9 @@ export function MediaCreatePage() {
         posterImage: form.posterImage || undefined,
         directorId: numOrUndefined(form.directorId),
       };
+
+      const translations = buildTranslationsPayload(i18nEnabled, { ro: i18nRo, ru: i18nRu });
+      if (translations) payload.translations = translations;
 
       if (form.typeName === 'MOVIE') {
         payload.duration = numOrUndefined(form.duration);
@@ -93,13 +114,28 @@ export function MediaCreatePage() {
         </select>
       </div>
 
-      <div className="row">
-        <div className="muted">title</div>
-        <input
-          value={form.title}
-          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-        />
-      </div>
+      <TranslationTabs
+        title="Translations"
+        fields={[
+          { key: 'title', label: 'title' },
+          { key: 'synopsis', label: 'synopsis', multiline: true },
+        ]}
+        requiredKeys={['title']}
+        en={{ title: form.title, synopsis: form.synopsis }}
+        ro={i18nRo}
+        ru={i18nRu}
+        enabled={i18nEnabled}
+        onChangeEn={(next) =>
+          setForm((f) => ({
+            ...f,
+            title: String(next.title ?? ''),
+            synopsis: String(next.synopsis ?? ''),
+          }))
+        }
+        onChangeRo={(next) => setI18nRo({ title: String(next.title ?? ''), synopsis: String(next.synopsis ?? '') })}
+        onChangeRu={(next) => setI18nRu({ title: String(next.title ?? ''), synopsis: String(next.synopsis ?? '') })}
+        onChangeEnabled={setI18nEnabled}
+      />
 
       <div className="row">
         <div className="muted">releaseDate</div>
@@ -132,14 +168,6 @@ export function MediaCreatePage() {
         <input
           value={form.posterImage}
           onChange={(e) => setForm((f) => ({ ...f, posterImage: e.target.value }))}
-        />
-      </div>
-
-      <div className="row">
-        <div className="muted">synopsis</div>
-        <textarea
-          value={form.synopsis}
-          onChange={(e) => setForm((f) => ({ ...f, synopsis: e.target.value }))}
         />
       </div>
 
