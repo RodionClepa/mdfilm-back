@@ -7,6 +7,7 @@ import '../App.css';
 import { useBookmarks } from '../bookmarks/useBookmarks';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
 import { usePublicLang } from '../publicLang';
+import { t } from '../publicI18n';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -26,6 +27,9 @@ export function SearchPage() {
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [mediaImgOk, setMediaImgOk] = useState<Record<number, boolean>>({});
+  const [peopleImgOk, setPeopleImgOk] = useState<Record<number, boolean>>({});
 
   const { lang } = usePublicLang();
 
@@ -81,7 +85,16 @@ export function SearchPage() {
                   active={bookmarks.isBookmarked(m.id)}
                   onToggle={(id) => void bookmarks.toggle(id)}
                 />
-                {m.title}
+                <div className="public-search-row">
+                  <div className="public-search-thumb">
+                    {m.posterImage && mediaImgOk[m.id] !== false ? (
+                      <img src={m.posterImage} alt={m.title} onError={() => setMediaImgOk((prev) => ({ ...prev, [m.id]: false }))} />
+                    ) : (
+                      <div className="public-search-thumb-placeholder">{t(lang, 'poster_fallback')}</div>
+                    )}
+                  </div>
+                  <div className="public-search-meta">{m.title}</div>
+                </div>
               </Link>
             ))}
             {!loading && results.media.length === 0 ? <div className="muted">No titles found.</div> : null}
@@ -91,7 +104,16 @@ export function SearchPage() {
             <div className="public-panel-title">People</div>
             {results.people.map((p) => (
               <Link key={p.id} to={`/actor/${p.id}`} className="public-list-link">
-                {p.name}
+                <div className="public-search-row">
+                  <div className="public-search-thumb square">
+                    {p.imageUrl && peopleImgOk[p.id] !== false ? (
+                      <img src={p.imageUrl} alt={p.name} onError={() => setPeopleImgOk((prev) => ({ ...prev, [p.id]: false }))} />
+                    ) : (
+                      <div className="public-search-thumb-placeholder">{t(lang, 'profile_no_image')}</div>
+                    )}
+                  </div>
+                  <div className="public-search-meta">{p.name}</div>
+                </div>
               </Link>
             ))}
             {!loading && results.people.length === 0 ? <div className="muted">No people found.</div> : null}
