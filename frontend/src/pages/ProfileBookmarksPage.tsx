@@ -7,6 +7,7 @@ import type { Bookmark } from '../types';
 import '../App.css';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
 import { usePublicLang } from '../publicLang';
+import { t, tMediaType } from '../publicI18n';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -15,6 +16,29 @@ function showError(e: unknown) {
 }
 
 type Sort = 'createdAt_desc' | 'createdAt_asc' | 'title_asc' | 'title_desc';
+
+function BookmarkCard({ b, bookmarked, onToggle, lang }: { b: Bookmark; bookmarked: boolean; onToggle: (id: number) => void; lang: any }) {
+  const [posterOk, setPosterOk] = useState(true);
+  const m = b.media;
+  return (
+    <Link key={b.id} to={`/title/${b.mediaId}`} className="profile-card-link">
+      <div className="profile-card">
+        <div className="profile-poster">
+          <BookmarkStar mediaId={b.mediaId} active={bookmarked} onToggle={onToggle} />
+          {m?.posterImage && posterOk ? (
+            <img src={m.posterImage} alt={m.title} onError={() => setPosterOk(false)} />
+          ) : (
+            <div className="profile-poster-placeholder">{t(lang, 'poster_fallback')}</div>
+          )}
+        </div>
+        <div className="profile-card-meta">
+          <div className="profile-card-title">{m?.title ?? `#${b.mediaId}`}</div>
+          <div className="profile-card-sub">{tMediaType(lang, m?.type?.name)}</div>
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 export function ProfileBookmarksPage() {
   const nav = useNavigate();
@@ -91,34 +115,34 @@ export function ProfileBookmarksPage() {
     <div className="app public-list">
       <div className="public-page-head">
         <div>
-          <div className="public-page-title">Bookmarks</div>
-          <div className="public-page-sub">Your saved titles (movies and series).</div>
+          <div className="public-page-title">{t(lang, 'bookmarks_title')}</div>
+          <div className="public-page-sub">{t(lang, 'bookmarks_sub')}</div>
         </div>
         <button className="public-icon-btn" onClick={() => void load()} disabled={loading} type="button">
-          Refresh
+          {t(lang, 'refresh')}
         </button>
       </div>
 
       <div className="public-panel" style={{ marginBottom: 12 }}>
-        <div className="public-panel-title">Filters</div>
+        <div className="public-panel-title">{t(lang, 'filters')}</div>
         <div style={{ display: 'grid', gap: 10 }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button className="public-icon-btn" type="button" onClick={() => setParam('type', '')}>
-              All
+              {t(lang, 'bookmarks_all')}
             </button>
             <button className="public-icon-btn" type="button" onClick={() => setParam('type', 'MOVIE')}>
-              Movies
+              {tMediaType(lang, 'MOVIE')}
             </button>
             <button className="public-icon-btn" type="button" onClick={() => setParam('type', 'SERIES')}>
-              Series
+              {tMediaType(lang, 'SERIES')}
             </button>
           </div>
 
           <input
             value={q}
             onChange={(e) => setParam('q', e.target.value)}
-            placeholder="Search title"
-            aria-label="Search title"
+            placeholder={t(lang, 'bookmarks_search_title')}
+            aria-label={t(lang, 'bookmarks_search_title')}
             style={{ padding: 10, borderRadius: 12, border: '1px solid var(--borderColor)', background: 'var(--bgColorTint)', color: 'var(--textColor)' }}
           />
 
@@ -127,30 +151,22 @@ export function ProfileBookmarksPage() {
             onChange={(e) => setParam('sort', e.target.value)}
             style={{ padding: 10, borderRadius: 12, border: '1px solid var(--borderColor)', background: 'var(--bgColorTint)', color: 'var(--textColor)' }}
           >
-            <option value="createdAt_desc">Newest</option>
-            <option value="createdAt_asc">Oldest</option>
-            <option value="title_asc">Title A-Z</option>
-            <option value="title_desc">Title Z-A</option>
+            <option value="createdAt_desc">{t(lang, 'bookmarks_newest')}</option>
+            <option value="createdAt_asc">{t(lang, 'bookmarks_oldest')}</option>
+            <option value="title_asc">{t(lang, 'sort_title_asc')}</option>
+            <option value="title_desc">{t(lang, 'sort_title_desc')}</option>
           </select>
         </div>
       </div>
 
       {error && <div className="error">{error}</div>}
-      {loading && <div className="muted">Loading…</div>}
+      {loading && <div className="muted">{t(lang, 'loading')}</div>}
 
       <div className="public-grid">
         {items.map((b) => (
-          <Link key={b.id} to={`/title/${b.mediaId}`} className="public-grid-item">
-            <BookmarkStar
-              mediaId={b.mediaId}
-              active={bookmarkedSet.has(b.mediaId)}
-              onToggle={(id) => void removeBookmark(id)}
-            />
-            <div className="public-grid-title">{b.media?.title ?? `#${b.mediaId}`}</div>
-            <div className="muted">{b.media?.type?.name ?? '—'}</div>
-          </Link>
+          <BookmarkCard b={b} bookmarked={bookmarkedSet.has(b.mediaId)} onToggle={(id) => void removeBookmark(id)} lang={lang} />
         ))}
-        {!loading && items.length === 0 ? <div className="muted">No bookmarks yet.</div> : null}
+        {!loading && items.length === 0 ? <div className="muted">{t(lang, 'bookmarks_empty')}</div> : null}
       </div>
     </div>
   );

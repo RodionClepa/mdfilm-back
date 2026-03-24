@@ -5,6 +5,7 @@ import { publicEndpoints } from '../publicEndpoints';
 import type { News } from '../types';
 import '../App.css';
 import { usePublicLang } from '../publicLang';
+import { t } from '../publicI18n';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -54,25 +55,25 @@ export function NewsDetailsPage() {
       <div className="title-hero">
         <div className="title-hero-top">
           <div>
-            <div className="title-kicker">News</div>
+            <div className="title-kicker">{t(lang, 'news_title')}</div>
             <div className="title-title">{item?.title ?? slug}</div>
             <div className="title-subtitle">{fmtDate(item?.createdAt)}</div>
           </div>
           <div className="actions" style={{ marginTop: 0 }}>
             <Link to="/news">
               <button className="public-icon-btn" type="button">
-                Back
+                {t(lang, 'back')}
               </button>
             </Link>
             <button className="public-icon-btn" onClick={() => void load()} disabled={loading} type="button">
-              Refresh
+              {t(lang, 'refresh')}
             </button>
           </div>
         </div>
       </div>
 
       {error && <div className="error">{error}</div>}
-      {!item && !error && <div className="muted">{loading ? 'Loading…' : 'Not found.'}</div>}
+      {!item && !error && <div className="muted">{loading ? t(lang, 'loading') : t(lang, 'not_found')}</div>}
 
       {item && (
         <div className="title-layout" style={{ gridTemplateColumns: '1fr' }}>
@@ -89,13 +90,13 @@ export function NewsDetailsPage() {
 
             {item.excerpt ? (
               <div className="title-panel">
-                <div className="title-panel-title">Summary</div>
+                <div className="title-panel-title">{t(lang, 'news_summary')}</div>
                 <div className="title-overview">{item.excerpt}</div>
               </div>
             ) : null}
 
             <div className="title-panel">
-              <div className="title-panel-title">Content</div>
+              <div className="title-panel-title">{t(lang, 'news_content')}</div>
               <div className="title-overview" style={{ whiteSpace: 'pre-wrap' }}>
                 {item.content ?? ''}
               </div>

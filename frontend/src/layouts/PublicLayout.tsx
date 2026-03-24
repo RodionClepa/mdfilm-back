@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { UserMenu } from '../auth/UserMenu';
 import { usePublicLang } from '../publicLang';
 import '../App.css';
+import { t } from '../publicI18n';
 
 export function PublicLayout() {
   const nav = useNavigate();
@@ -55,16 +56,16 @@ export function PublicLayout() {
             </NavLink>
             <nav className="public-nav">
               <NavLink to="/movies" className={({ isActive }) => (isActive ? 'active' : '')}>
-                Movies
+                {t(lang, 'nav_movies')}
               </NavLink>
               <NavLink to="/series" className={({ isActive }) => (isActive ? 'active' : '')}>
-                Series
+                {t(lang, 'nav_series')}
               </NavLink>
               <NavLink to="/news" className={({ isActive }) => (isActive ? 'active' : '')}>
-                News
+                {t(lang, 'nav_news')}
               </NavLink>
               <NavLink to="/people" className={({ isActive }) => (isActive ? 'active' : '')}>
-                People
+                {t(lang, 'nav_people')}
               </NavLink>
             </nav>
           </div>
@@ -74,8 +75,8 @@ export function PublicLayout() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search"
-                aria-label="Search"
+                placeholder={t(lang, 'search_placeholder')}
+                aria-label={t(lang, 'search_placeholder')}
               />
             </form>
 
@@ -97,7 +98,7 @@ export function PublicLayout() {
               onClick={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
               title="Toggle theme"
             >
-              Theme: {theme}
+              {t(lang, 'theme_label')}: {theme}
             </button>
 
             <UserMenu />

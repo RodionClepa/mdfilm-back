@@ -12,6 +12,7 @@ import 'swiper/css/scrollbar';
 import { useBookmarks } from '../bookmarks/useBookmarks';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
 import { usePublicLang } from '../publicLang';
+import { t, tMediaType } from '../publicI18n';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -30,7 +31,17 @@ function SectionHeader({ title, description }: { title: string; description: str
   );
 }
 
-function MediaCard({ m, bookmarked, onToggle }: { m: Media; bookmarked: boolean; onToggle: (id: number) => void }) {
+function MediaCard({
+  m,
+  bookmarked,
+  onToggle,
+  lang,
+}: {
+  m: Media;
+  bookmarked: boolean;
+  onToggle: (id: number) => void;
+  lang: 'en' | 'ro' | 'ru';
+}) {
   const [posterOk, setPosterOk] = useState(true);
   return (
     <Link to={`/title/${m.id}`} className="homepage-card-link">
@@ -40,11 +51,11 @@ function MediaCard({ m, bookmarked, onToggle }: { m: Media; bookmarked: boolean;
           {m.posterImage && posterOk ? (
             <img src={m.posterImage} alt={m.title} onError={() => setPosterOk(false)} />
           ) : (
-            <div className="homepage-poster-placeholder">No poster</div>
+            <div className="homepage-poster-placeholder">{t(lang, 'poster_fallback')}</div>
           )}
           <div className="homepage-poster-overlay">
             <div className="homepage-badges">
-              <span className="homepage-badge">{m.type?.name ?? '—'}</span>
+              <span className="homepage-badge">{tMediaType(lang, m.type?.name)}</span>
               <span className="homepage-badge subtle">
                 {new Date(m.releaseDate).toISOString().slice(0, 10)}
               </span>
@@ -64,11 +75,13 @@ function SectionSlider({
   bookmarkedIds,
   onToggle,
   coverflow,
+  lang,
 }: {
   items: Media[];
   bookmarkedIds: Set<number>;
   onToggle: (id: number) => void;
   coverflow?: boolean;
+  lang: 'en' | 'ro' | 'ru';
 }) {
   return (
     <Swiper
@@ -97,7 +110,7 @@ function SectionSlider({
     >
       {items.map((m) => (
         <SwiperSlide key={m.id} style={{ width: 240 }}>
-          <MediaCard m={m} bookmarked={bookmarkedIds.has(m.id)} onToggle={onToggle} />
+          <MediaCard m={m} bookmarked={bookmarkedIds.has(m.id)} onToggle={onToggle} lang={lang} />
         </SwiperSlide>
       ))}
     </Swiper>
@@ -173,48 +186,40 @@ export function MainPage() {
         <div className="homepage-hero-top">
           <div>
             <div className="homepage-brand">mdfilm</div>
-            <div className="homepage-subtitle">Discover what to watch tonight.</div>
-          </div>
-          <div className="homepage-actions">
-            <Link to="/crud/media">
-              <button className="homepage-btn">Admin</button>
-            </Link>
-            <button className="homepage-btn ghost" onClick={() => void refresh()} disabled={loading}>
-              Refresh
-            </button>
+            <div className="homepage-subtitle">{t(lang, 'homepage_subtitle')}</div>
           </div>
         </div>
         <div className="homepage-hero-note">
-          Featured picks are curated by admin. Latest and Upcoming are derived from your database.
+          {t(lang, 'homepage_hero_note')}
         </div>
       </div>
 
       {error && <div className="error">{error}</div>}
-      {loading && <div className="muted" style={{ margin: '12px 0' }}>Loading…</div>}
+      {loading && <div className="muted" style={{ margin: '12px 0' }}>{t(lang, 'loading')}</div>}
 
       <div className="homepage-section">
-        <SectionHeader title="Featured" description="Admin-curated highlights. A few picks worth your attention." />
-        <SectionSlider items={featured} bookmarkedIds={bookmarks.bookmarkedIds} onToggle={(id) => void bookmarks.toggle(id)} coverflow />
+        <SectionHeader title={t(lang, 'homepage_featured')} description={t(lang, 'homepage_featured_desc')} />
+        <SectionSlider items={featured} bookmarkedIds={bookmarks.bookmarkedIds} onToggle={(id) => void bookmarks.toggle(id)} coverflow lang={lang} />
       </div>
 
       <div className="homepage-section">
-        <SectionHeader title="Latest Movies" description="Recently added" />
-        <SectionSlider items={latestMovies} bookmarkedIds={bookmarks.bookmarkedIds} onToggle={(id) => void bookmarks.toggle(id)} />
+        <SectionHeader title={t(lang, 'homepage_latest_movies')} description={t(lang, 'homepage_recently_added')} />
+        <SectionSlider items={latestMovies} bookmarkedIds={bookmarks.bookmarkedIds} onToggle={(id) => void bookmarks.toggle(id)} lang={lang} />
       </div>
 
       <div className="homepage-section">
-        <SectionHeader title="Latest Series" description="Recently added" />
-        <SectionSlider items={latestSeries} bookmarkedIds={bookmarks.bookmarkedIds} onToggle={(id) => void bookmarks.toggle(id)} />
+        <SectionHeader title={t(lang, 'homepage_latest_series')} description={t(lang, 'homepage_recently_added')} />
+        <SectionSlider items={latestSeries} bookmarkedIds={bookmarks.bookmarkedIds} onToggle={(id) => void bookmarks.toggle(id)} lang={lang} />
       </div>
 
       <div className="homepage-section">
-        <SectionHeader title="Upcoming Movies" description="Coming soon" />
-        <SectionSlider items={upcomingMovies} bookmarkedIds={bookmarks.bookmarkedIds} onToggle={(id) => void bookmarks.toggle(id)} />
+        <SectionHeader title={t(lang, 'homepage_upcoming_movies')} description={t(lang, 'homepage_coming_soon')} />
+        <SectionSlider items={upcomingMovies} bookmarkedIds={bookmarks.bookmarkedIds} onToggle={(id) => void bookmarks.toggle(id)} lang={lang} />
       </div>
 
       <div className="homepage-section">
-        <SectionHeader title="Upcoming Series" description="Coming soon" />
-        <SectionSlider items={upcomingSeries} bookmarkedIds={bookmarks.bookmarkedIds} onToggle={(id) => void bookmarks.toggle(id)} />
+        <SectionHeader title={t(lang, 'homepage_upcoming_series')} description={t(lang, 'homepage_coming_soon')} />
+        <SectionSlider items={upcomingSeries} bookmarkedIds={bookmarks.bookmarkedIds} onToggle={(id) => void bookmarks.toggle(id)} lang={lang} />
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { publicEndpoints } from '../publicEndpoints';
 import type { News } from '../types';
 import '../App.css';
 import { usePublicLang } from '../publicLang';
+import { t } from '../publicI18n';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -49,16 +50,16 @@ export function NewsPage() {
     <div className="app public-list">
       <div className="public-page-head">
         <div>
-          <div className="public-page-title">News</div>
-          <div className="public-page-sub">Latest announcements and updates.</div>
+          <div className="public-page-title">{t(lang, 'news_title')}</div>
+          <div className="public-page-sub">{t(lang, 'news_sub')}</div>
         </div>
         <button className="public-icon-btn" onClick={() => void load()} disabled={loading} type="button">
-          Refresh
+          {t(lang, 'refresh')}
         </button>
       </div>
 
       {error && <div className="error">{error}</div>}
-      {loading && <div className="muted">Loading…</div>}
+      {loading && <div className="muted">{t(lang, 'loading')}</div>}
 
       <div className="public-grid">
         {items.map((n) => (
@@ -68,7 +69,7 @@ export function NewsPage() {
             {n.excerpt ? <div className="muted" style={{ marginTop: 6 }}>{n.excerpt}</div> : null}
           </Link>
         ))}
-        {!loading && items.length === 0 ? <div className="muted">No news yet.</div> : null}
+        {!loading && items.length === 0 ? <div className="muted">{t(lang, 'news_empty')}</div> : null}
       </div>
     </div>
   );

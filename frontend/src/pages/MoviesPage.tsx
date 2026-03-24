@@ -7,6 +7,7 @@ import '../App.css';
 import { useBookmarks } from '../bookmarks/useBookmarks';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
 import { usePublicLang } from '../publicLang';
+import { t } from '../publicI18n';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -109,24 +110,24 @@ export function MoviesPage() {
     <div className="app public-list">
       <div className="public-page-head">
         <div>
-          <div className="public-page-title">Movies</div>
-          <div className="public-page-sub">Browse all movies in your database.</div>
+          <div className="public-page-title">{t(lang, 'movies_title')}</div>
+          <div className="public-page-sub">{t(lang, 'movies_sub')}</div>
         </div>
         <button className="public-icon-btn" onClick={() => void load()} disabled={loading} type="button">
-          Refresh
+          {t(lang, 'refresh')}
         </button>
       </div>
 
       {error && <div className="error">{error}</div>}
-      {loading && <div className="muted">Loading…</div>}
+      {loading && <div className="muted">{t(lang, 'loading')}</div>}
 
       <div className="browse-layout">
         <div className="title-panel browse-sidebar">
-          <div className="title-panel-title">Filters</div>
+          <div className="title-panel-title">{t(lang, 'filters')}</div>
 
           <div className="browse-filters">
             <div className="browse-field">
-              <label>Release date</label>
+              <label>{t(lang, 'release_date')}</label>
               <div className="browse-date-range">
                 <input className="browse-control" type="date" value={dateFrom} onChange={(e) => updateParam('dateFrom', e.target.value)} />
                 <input className="browse-control" type="date" value={dateTo} onChange={(e) => updateParam('dateTo', e.target.value)} />
@@ -134,39 +135,39 @@ export function MoviesPage() {
             </div>
 
             <div className="browse-field">
-              <label>Sort</label>
+              <label>{t(lang, 'sort')}</label>
               <select className="browse-control" value={sort} onChange={(e) => updateParam('sort', e.target.value)}>
-                <option value="latest">Latest</option>
-                <option value="oldest">Oldest</option>
-                <option value="title_asc">Title A–Z</option>
-                <option value="title_desc">Title Z–A</option>
+                <option value="latest">{t(lang, 'sort_latest')}</option>
+                <option value="oldest">{t(lang, 'sort_oldest')}</option>
+                <option value="title_asc">{t(lang, 'sort_title_asc')}</option>
+                <option value="title_desc">{t(lang, 'sort_title_desc')}</option>
               </select>
             </div>
 
             <button className="public-icon-btn" type="button" onClick={resetFilters} disabled={loading}>
-              Reset
+              {t(lang, 'reset')}
             </button>
           </div>
         </div>
 
         <div>
           <div className="muted browse-meta">
-            Showing {items.length} of {total}
+            {t(lang, 'showing')} {items.length} {t(lang, 'of')} {total}
           </div>
 
           <div className="public-grid">
             {items.map((m) => (
               <PosterCard key={m.id} m={m} bookmarked={bookmarks.isBookmarked(m.id)} onToggle={(id) => void bookmarks.toggle(id)} />
             ))}
-            {!loading && items.length === 0 ? <div className="muted">No movies found.</div> : null}
+            {!loading && items.length === 0 ? <div className="muted">{t(lang, 'movies_empty')}</div> : null}
           </div>
 
           <div className="browse-actions" style={{ marginTop: 14 }}>
             <button className="public-icon-btn" type="button" onClick={() => updatePage(page - 1)} disabled={loading || page <= 1}>
-              Prev
+              {t(lang, 'prev')}
             </button>
             <div className="muted" style={{ alignSelf: 'center' }}>
-              Page {page}
+              {t(lang, 'page')} {page}
             </div>
             <button
               className="public-icon-btn"
@@ -174,7 +175,7 @@ export function MoviesPage() {
               onClick={() => updatePage(page + 1)}
               disabled={loading || page * pageSize >= total}
             >
-              Next
+              {t(lang, 'next')}
             </button>
           </div>
         </div>

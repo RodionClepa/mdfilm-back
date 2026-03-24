@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ApiError } from '../api';
 import { endpoints } from '../endpoints';
 import type { User } from '../types';
+import { usePublicLang } from '../publicLang';
+import { t } from '../publicI18n';
 
 function isJwtPresent() {
   return Boolean(localStorage.getItem('mdfilm-jwt'));
@@ -11,6 +13,7 @@ function isJwtPresent() {
 export function UserMenu() {
   const loc = useLocation();
   const nav = useNavigate();
+  const { lang } = usePublicLang();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -68,7 +71,7 @@ export function UserMenu() {
     window.location.href = `/api/auth/google/start?next=${encodeURIComponent(next)}`;
   }
 
-  const label = user ? user.name || user.email : 'Login';
+  const label = user ? user.name || user.email : t(lang, 'menu_login');
 
   return (
     <div className="user-menu" ref={rootRef}>
@@ -92,23 +95,23 @@ export function UserMenu() {
                 <div>
                   <div className="user-menu-name">{user.name || user.email}</div>
                   <div className="user-menu-sub">{user.email}</div>
-                  <div className="user-menu-sub">{user.role}</div>
+                  <div className="user-menu-sub">{user.role === 'ADMIN' ? t(lang, 'role_admin') : t(lang, 'role_user')}</div>
                 </div>
               </div>
 
               <div className="user-menu-actions">
                 {user.role === 'USER' ? (
                   <Link to="/profile/bookmarks" onClick={() => setOpen(false)}>
-                    <button type="button">Bookmarks</button>
+                    <button type="button">{t(lang, 'menu_bookmarks')}</button>
                   </Link>
                 ) : null}
                 {user.role === 'ADMIN' ? (
                   <Link to="/crud" onClick={() => setOpen(false)}>
-                    <button type="button">Admin</button>
+                    <button type="button">{t(lang, 'menu_admin')}</button>
                   </Link>
                 ) : null}
                 <button type="button" onClick={logout}>
-                  Logout
+                  {t(lang, 'menu_logout')}
                 </button>
               </div>
             </>
@@ -116,10 +119,10 @@ export function UserMenu() {
             <>
               <div className="user-menu-actions">
                 <button type="button" onClick={loginGoogle}>
-                  Continue with Google
+                  {t(lang, 'menu_continue_google')}
                 </button>
                 <Link to={`/admin/login?next=${encodeURIComponent(next)}`} onClick={() => setOpen(false)}>
-                  <button type="button">Admin login</button>
+                  <button type="button">{t(lang, 'menu_admin_login')}</button>
                 </Link>
               </div>
             </>

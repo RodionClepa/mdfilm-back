@@ -6,11 +6,12 @@ import 'swiper/css';
 import 'swiper/css/scrollbar';
 import { ApiError } from '../api';
 import { publicEndpoints } from '../publicEndpoints';
-import type { Gender, Media, Person } from '../types';
+import type { Media, Person } from '../types';
 import '../App.css';
 import { useBookmarks } from '../bookmarks/useBookmarks';
 import { BookmarkStar } from '../bookmarks/BookmarkStar';
 import { usePublicLang } from '../publicLang';
+import { t, tMediaType } from '../publicI18n';
 
 function showError(e: unknown) {
   if (e instanceof ApiError) return `${e.message} (HTTP ${e.status})`;
@@ -27,13 +28,6 @@ function fmtDate(d?: string | null) {
   }
 }
 
-function fmtGender(g?: Gender | null) {
-  if (!g) return '—';
-  if (g === 'MALE') return 'Male';
-  if (g === 'FEMALE') return 'Female';
-  return 'Unspecified';
-}
-
 function fmtMoney(v?: number | null) {
   if (v == null) return '—';
   try {
@@ -45,6 +39,7 @@ function fmtMoney(v?: number | null) {
 
 function MediaCard({ m, bookmarked, onToggle }: { m: Media; bookmarked: boolean; onToggle: (id: number) => void }) {
   const [posterOk, setPosterOk] = useState(true);
+  const { lang } = usePublicLang();
   return (
     <Link to={`/title/${m.id}`} className="profile-card-link">
       <div className="profile-card">
@@ -53,14 +48,14 @@ function MediaCard({ m, bookmarked, onToggle }: { m: Media; bookmarked: boolean;
           {m.posterImage && posterOk ? (
             <img src={m.posterImage} alt={m.title} onError={() => setPosterOk(false)} />
           ) : (
-            <div className="profile-poster-placeholder">No poster</div>
+            <div className="profile-poster-placeholder">{t(lang, 'poster_fallback')}</div>
           )}
         </div>
         <div className="profile-card-meta">
           <div className="profile-card-title" title={m.title}>
             {m.title}
           </div>
-          <div className="profile-card-sub">{m.type?.name ?? '—'}</div>
+          <div className="profile-card-sub">{tMediaType(lang, m.type?.name)}</div>
         </div>
       </div>
     </Link>
@@ -109,14 +104,14 @@ export function ActorPage() {
       <div className="profile-hero">
         <div className="profile-hero-top">
           <div>
-            <div className="profile-kicker">Actor</div>
-            <div className="profile-title">{item?.name ?? 'Actor'}</div>
+            <div className="profile-kicker">{t(lang, 'role_actor')}</div>
+            <div className="profile-title">{item?.name ?? t(lang, 'role_actor')}</div>
           </div>
         </div>
       </div>
 
       {error && <div className="error">{error}</div>}
-      {!item && !error && <div className="muted">{loading ? 'Loading…' : 'Not found.'}</div>}
+      {!item && !error && <div className="muted">{loading ? t(lang, 'loading') : t(lang, 'not_found')}</div>}
 
       {item && (
         <div className="profile-layout">
@@ -125,29 +120,31 @@ export function ActorPage() {
               {item.imageUrl && avatarOk ? (
                 <img src={item.imageUrl} alt={item.name} onError={() => setAvatarOk(false)} />
               ) : (
-                <div className="profile-avatar-placeholder">No image</div>
+                <div className="profile-avatar-placeholder">{t(lang, 'profile_no_image')}</div>
               )}
             </div>
 
             <div className="profile-meta">
-              <div className="profile-chip">Born: {fmtDate(item.birthDate)}</div>
-              <div className="profile-chip">Gender: {fmtGender(item.gender as Gender)}</div>
-              <div className="profile-chip">Place of birth: {item.placeOfBirth ?? '—'}</div>
-              <div className="profile-chip">Earnings: {fmtMoney(item.earnings)}</div>
+              <div className="profile-chip">{t(lang, 'profile_born')}: {fmtDate(item.birthDate)}</div>
+              <div className="profile-chip">
+                {t(lang, 'profile_gender')}: {item.gender === 'MALE' ? t(lang, 'gender_male') : item.gender === 'FEMALE' ? t(lang, 'gender_female') : t(lang, 'gender_unspecified')}
+              </div>
+              <div className="profile-chip">{t(lang, 'profile_place_of_birth')}: {item.placeOfBirth ?? '—'}</div>
+              <div className="profile-chip">{t(lang, 'profile_earnings')}: {fmtMoney(item.earnings)}</div>
             </div>
           </div>
 
           <div className="profile-main">
             <div className="profile-panel">
-              <div className="profile-panel-title">Biography</div>
-              <div className="profile-bio">{item.biography && item.biography.trim() !== '' ? item.biography : 'No biography yet.'}</div>
+              <div className="profile-panel-title">{t(lang, 'profile_biography')}</div>
+              <div className="profile-bio">{item.biography && item.biography.trim() !== '' ? item.biography : t(lang, 'profile_no_bio')}</div>
             </div>
 
             <div className="profile-panel">
-              <div className="profile-panel-title">Filmography</div>
-              {loading && <div className="muted">Loading…</div>}
+              <div className="profile-panel-title">{t(lang, 'profile_filmography')}</div>
+              {loading && <div className="muted">{t(lang, 'loading')}</div>}
               {!loading && media.length === 0 ? (
-                <div className="muted">No titles yet.</div>
+                <div className="muted">{t(lang, 'profile_no_titles')}</div>
               ) : null}
 
               {media.length > 0 ? (
