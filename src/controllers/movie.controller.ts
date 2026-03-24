@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import { movieService, MovieService } from '../services/movie.service.js';
 import { Media } from "../../generated/prisma/client.js"
+import { getReqLocale } from '../i18n/locale.js';
 
 class MovieController {
 
   async getMovies(req: Request, res: Response) {
     try {
-      const movies = await movieService.getAll();
+      const locale = getReqLocale(req);
+      const movies = await movieService.getAll(locale);
       res.json(movies);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch movies' });
@@ -15,7 +17,8 @@ class MovieController {
 
   async getMovie(req: Request, res: Response) {
     try {
-      const movie = await movieService.getById(Number(req.params.id));
+      const locale = getReqLocale(req);
+      const movie = await movieService.getById(Number(req.params.id), locale);
       if (!movie) {
         return res.status(404).json({ error: 'Movie not found' });
       }

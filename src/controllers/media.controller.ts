@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import { mediaService } from '../services/media.service.js';
+import { getReqLocale } from '../i18n/locale.js';
 
 class MediaController {
   async getMedia(req: Request, res: Response) {
     try {
-      const media = await mediaService.getAll();
+      const locale = getReqLocale(req);
+      const media = await mediaService.getAll(locale);
       res.json(media);
     } catch (error: any) {
       // Surface underlying error to help debugging
@@ -16,8 +18,9 @@ class MediaController {
 
   async getMediaById(req: Request, res: Response) {
     try {
+      const locale = getReqLocale(req);
       const id = Number(req.params.id);
-      const media = await mediaService.getById(id);
+      const media = await mediaService.getById(id, locale);
       res.json(media);
     } catch (error: any) {
       res.status(404).json({ error: error.message ?? 'Media not found' });
@@ -55,8 +58,9 @@ class MediaController {
 
   async getMediaDirectors(req: Request, res: Response) {
     try {
+      const locale = getReqLocale(req);
       const mediaId = Number(req.params.id);
-      const directors = await mediaService.getDirectors(mediaId);
+      const directors = await mediaService.getDirectors(mediaId, locale);
       res.json(directors);
     } catch (error: any) {
       res.status(400).json({ error: error.message ?? 'Failed to fetch directors' });
@@ -106,8 +110,9 @@ class MediaController {
 
   async getMediaCast(req: Request, res: Response) {
     try {
+      const locale = getReqLocale(req);
       const mediaId = Number(req.params.id);
-      const cast = await mediaService.getCast(mediaId);
+      const cast = await mediaService.getCast(mediaId, locale);
       res.json(cast);
     } catch (error: any) {
       res.status(400).json({ error: error.message ?? 'Failed to fetch cast' });
@@ -120,9 +125,10 @@ class MediaController {
       const media = await mediaService.addCastMember(mediaId, {
         personId: Number(req.body?.personId),
         characterName: req.body?.characterName,
+        translations: Array.isArray(req.body?.translations) ? req.body.translations : undefined,
         billingOrder:
           req.body?.billingOrder != null ? Number(req.body.billingOrder) : undefined,
-      });
+      } as any);
       res.status(200).json(media);
     } catch (error: any) {
       res.status(400).json({ error: error.message });

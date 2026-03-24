@@ -1,6 +1,7 @@
 import { prisma } from '../../lib/prisma.js';
 import { movieService } from './movie.service.js';
 import { seriesService } from './series.service.js';
+import { Locale, parseLocaleStrict, pickTranslation } from '../i18n/locale.js';
 
 type MediaTypeName = 'MOVIE' | 'SERIES' | string;
 
@@ -52,6 +53,81 @@ export interface MediaCreateInput extends BaseMediaCreateInput {
 }
 
 export class MediaService {
+  private async _upsertMediaTranslations(mediaId: number, translations: any) {
+    if (!Array.isArray(translations) || translations.length === 0) return;
+
+    await prisma.$transaction(
+      translations.map((t: any) => {
+        const locale = parseLocaleStrict(t?.locale);
+        if (!locale) throw new Error(`Unsupported locale '${t?.locale}'`);
+        if (!t?.title) throw new Error(`Translation title is required for locale '${locale}'`);
+        return prisma.mediaI18n.upsert({
+          where: { mediaId_locale: { mediaId, locale } },
+          update: {
+            title: String(t.title),
+            synopsis:
+              t?.synopsis != null && String(t.synopsis).trim() !== ''
+                ? String(t.synopsis)
+                : null,
+          },
+          create: {
+            mediaId,
+            locale,
+            title: String(t.title),
+            synopsis:
+              t?.synopsis != null && String(t.synopsis).trim() !== ''
+                ? String(t.synopsis)
+                : null,
+          },
+        });
+      }),
+    );
+  }
+
+  private _localizeDirectorRow(row: any, locale: Locale) {
+    const d: any = row?.director;
+    const dt = pickTranslation(d?.translations, locale);
+    return {
+      ...row,
+      director: {
+        ...d,
+        name: dt?.name ?? d?.name,
+        biography: dt?.biography ?? d?.biography,
+      },
+    };
+  }
+
+  private _localizePersonRow(row: any, locale: Locale) {
+    const p: any = row?.person;
+    const pt = pickTranslation(p?.translations, locale);
+    return {
+      ...row,
+      person: {
+        ...p,
+        name: pt?.name ?? p?.name,
+        biography: pt?.biography ?? p?.biography,
+      },
+    };
+  }
+
+  private _localizeMedia(m: any, locale: Locale) {
+    const mt = pickTranslation(m?.translations, locale);
+    const directors = Array.isArray(m?.directors)
+      ? m.directors.map((md: any) => this._localizeDirectorRow(md, locale))
+      : m?.directors;
+    const cast = Array.isArray(m?.cast)
+      ? m.cast.map((mc: any) => this._localizePersonRow(mc, locale))
+      : m?.cast;
+
+    return {
+      ...m,
+      title: mt?.title ?? m?.title,
+      synopsis: mt?.synopsis ?? m?.synopsis,
+      directors,
+      cast,
+    };
+  }
+
   private async _ensureMediaExists(id: number) {
     const media = await prisma.media.findUnique({
       where: { id },
@@ -95,12 +171,13 @@ export class MediaService {
     }
   }
 
-  async getAll() {
+  async getAll(locale: Locale) {
     return prisma.media.findMany({
       include: {
+        translations: { where: { locale: { in: [locale, 'en'] } } },
         type: true,
-        directors: { include: { director: true } },
-        cast: { include: { person: true } },
+        directors: { include: { director: { include: { translations: { where: { locale: { in: [locale, 'en'] } } } } } } },
+        cast: { include: { person: { include: { translations: { where: { locale: { in: [locale, 'en'] } } } } } } },
         movieInfo: true,
         seriesInfo: true,
         seasons: {
@@ -110,18 +187,19 @@ export class MediaService {
         },
         watchLinks: true,
       },
-    });
+    }).then((rows: any[]) => rows.map((m: any) => this._localizeMedia(m, locale)));
   }
 
-  async getById(id: number) {
+  async getById(id: number, locale: Locale) {
     if (!id) throw new Error('ID is required.');
 
     const media = await prisma.media.findUnique({
       where: { id },
       include: {
+        translations: { where: { locale: { in: [locale, 'en'] } } },
         type: true,
-        directors: { include: { director: true } },
-        cast: { include: { person: true } },
+        directors: { include: { director: { include: { translations: { where: { locale: { in: [locale, 'en'] } } } } } } },
+        cast: { include: { person: { include: { translations: { where: { locale: { in: [locale, 'en'] } } } } } } },
         movieInfo: true,
         seriesInfo: true,
         seasons: {
@@ -137,18 +215,18 @@ export class MediaService {
       throw new Error(`Media with ID ${id} not found.`);
     }
 
-    return media;
+    return this._localizeMedia(media as any, locale);
   }
 
-  async getCast(mediaId: number) {
+  async getCast(mediaId: number, locale: Locale) {
     if (!mediaId) throw new Error('mediaId is required.');
     await this._ensureMediaExists(mediaId);
 
     return prisma.mediaCast.findMany({
       where: { mediaId },
-      include: { person: true },
+      include: { person: { include: { translations: { where: { locale: { in: [locale, 'en'] } } } } } },
       orderBy: [{ billingOrder: 'asc' }, { createdAt: 'asc' }],
-    });
+    }).then((rows: any[]) => rows.map((r: any) => this._localizePersonRow(r, locale)));
   }
 
   async addCastMember(
@@ -175,7 +253,7 @@ export class MediaService {
       },
     });
 
-    return this.getById(mediaId);
+    return this.getById(mediaId, 'en');
   }
 
   async replaceCast(
@@ -222,7 +300,7 @@ export class MediaService {
         : []),
     ]);
 
-    return this.getById(mediaId);
+    return this.getById(mediaId, 'en');
   }
 
   async removeCastMember(mediaId: number, personId: number) {
@@ -234,18 +312,18 @@ export class MediaService {
       where: { mediaId_personId: { mediaId, personId } },
     });
 
-    return this.getById(mediaId);
+    return this.getById(mediaId, 'en');
   }
 
-  async getDirectors(mediaId: number) {
+  async getDirectors(mediaId: number, locale: Locale) {
     if (!mediaId) throw new Error('mediaId is required.');
     await this._ensureMediaExists(mediaId);
 
     return prisma.mediaDirector.findMany({
       where: { mediaId },
-      include: { director: true },
+      include: { director: { include: { translations: { where: { locale: { in: [locale, 'en'] } } } } } },
       orderBy: { createdAt: 'asc' },
-    });
+    }).then((rows: any[]) => rows.map((r: any) => this._localizeDirectorRow(r, locale)));
   }
 
   async addDirectors(mediaId: number, directorIds: number[]) {
@@ -264,7 +342,7 @@ export class MediaService {
       skipDuplicates: true,
     });
 
-    return this.getById(mediaId);
+    return this.getById(mediaId, 'en');
   }
 
   async replaceDirectors(mediaId: number, directorIds: number[]) {
@@ -292,7 +370,7 @@ export class MediaService {
         : []),
     ]);
 
-    return this.getById(mediaId);
+    return this.getById(mediaId, 'en');
   }
 
   async removeDirector(mediaId: number, directorId: number) {
@@ -304,7 +382,7 @@ export class MediaService {
       where: { mediaId_directorId: { mediaId, directorId } },
     });
 
-    return this.getById(mediaId);
+    return this.getById(mediaId, 'en');
   }
 
   /**
@@ -359,7 +437,7 @@ export class MediaService {
       typeId: mediaType.id,
     };
 
-    return prisma.media.create({
+    const created = await prisma.media.create({
       data: mediaData,
       include: {
         type: true,
@@ -369,6 +447,26 @@ export class MediaService {
         seriesInfo: true,
       },
     });
+
+    await prisma.mediaI18n.upsert({
+      where: { mediaId_locale: { mediaId: created.id, locale: 'en' } },
+      update: {
+        title: String(data.title),
+        synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+      },
+      create: {
+        mediaId: created.id,
+        locale: 'en',
+        title: String(data.title),
+        synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+      },
+    });
+
+    if ((data as any)?.translations) {
+      await this._upsertMediaTranslations(created.id, (data as any).translations);
+    }
+
+    return this.getById(created.id, 'en');
   }
 
   async update(id: number, data: Partial<MediaCreateInput>) {
@@ -390,7 +488,7 @@ export class MediaService {
           : new Date(data.releaseDate);
     }
 
-    return prisma.media.update({
+    const updated = await prisma.media.update({
       where: { id },
       data: updateData,
       include: {
@@ -401,6 +499,31 @@ export class MediaService {
         seriesInfo: true,
       },
     });
+
+    if (data.title !== undefined || data.synopsis !== undefined) {
+      await prisma.mediaI18n.upsert({
+        where: { mediaId_locale: { mediaId: id, locale: 'en' } },
+        update: {
+          ...(data.title !== undefined ? { title: String(data.title) } : {}),
+          ...(data.synopsis !== undefined
+            ? { synopsis: data.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null }
+            : {}),
+        },
+        create: {
+          mediaId: id,
+          locale: 'en',
+          title: data.title != null ? String(data.title) : '',
+          synopsis:
+            data.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        },
+      });
+    }
+
+    if ((data as any)?.translations) {
+      await this._upsertMediaTranslations(id, (data as any).translations);
+    }
+
+    return this.getById(updated.id, 'en');
   }
 
   async delete(id: number) {

@@ -10,6 +10,7 @@ import personRoutes from "./routes/person.route.js";
 import homepageRoutes from "./routes/homepage.route.js";
 import authRoutes from "./routes/auth.route.js";
 import bookmarkRoutes from "./routes/bookmark.route.js";
+import newsRoutes from "./routes/news.route.js";
 
 const app: Express = express();
 
@@ -34,6 +35,7 @@ app.use('/api/series', seriesRoutes);
 app.use('/api/homepage', homepageRoutes);
 app.use('/api/directors', directorRoutes);
 app.use('/api/people', personRoutes);
+app.use('/api/news', newsRoutes);
 
 // Season/Episode endpoints (nested + direct IDs)
 app.use('/api', seasonRoutes);

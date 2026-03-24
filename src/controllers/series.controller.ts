@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import { seriesService } from '../services/series.service.js';
+import { getReqLocale } from '../i18n/locale.js';
 
 class SeriesController {
   async getSeries(req: Request, res: Response) {
     try {
-      const series = await seriesService.getAll();
+      const locale = getReqLocale(req);
+      const series = await seriesService.getAll(locale);
       res.json(series);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch series' });
@@ -13,7 +15,8 @@ class SeriesController {
 
   async getSeriesById(req: Request, res: Response) {
     try {
-      const series = await seriesService.getById(Number(req.params.id));
+      const locale = getReqLocale(req);
+      const series = await seriesService.getById(Number(req.params.id), locale);
       res.json(series);
     } catch (error: any) {
       res.status(404).json({ error: error.message ?? 'Series not found' });

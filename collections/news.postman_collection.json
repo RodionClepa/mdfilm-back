@@ -1,0 +1,211 @@
+{
+  "info": {
+    "name": "News API Tests",
+    "_postman_id": "00000000-0000-0000-0000-0000000000ne",
+    "description": "Admin-only CRUD for News + public localized reads via ?lang= (en/ro/ru) with EN fallback. Set collection variables (baseUrl, adminUsername, adminPassword).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "adminUsername", "value": "" },
+    { "key": "adminPassword", "value": "" },
+    { "key": "token", "value": "" },
+    { "key": "lang", "value": "en" },
+    { "key": "newsId", "value": "" },
+    { "key": "newsSlug", "value": "site-launch" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Admin login (stores token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.token) {",
+                  "  pm.collectionVariables.set('token', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/admin/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "admin", "login"]
+            }
+          }
+        },
+        {
+          "name": "Me (requires token)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "News (Admin)",
+      "item": [
+        {
+          "name": "Admin list (all translations)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/news/admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "news", "admin"]
+            }
+          }
+        },
+        {
+          "name": "Admin create (stores newsId + newsSlug)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id) pm.collectionVariables.set('newsId', String(json.id));",
+                  "if (json && json.slug) pm.collectionVariables.set('newsSlug', String(json.slug));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"{{newsSlug}}\",\n  \"coverImageUrl\": \"\",\n  \"title\": \"EN title\",\n  \"excerpt\": \"EN excerpt\",\n  \"content\": \"EN content\",\n  \"translations\": [\n    { \"locale\": \"ro\", \"title\": \"RO titlu\", \"excerpt\": \"RO extras\", \"content\": \"RO continut\" },\n    { \"locale\": \"ru\", \"title\": \"RU название\", \"excerpt\": \"RU кратко\", \"content\": \"RU контент\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/news/admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "news", "admin"]
+            }
+          }
+        },
+        {
+          "name": "Admin get by id (uses newsId)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/news/admin/{{newsId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "news", "admin", "{{newsId}}"]
+            }
+          }
+        },
+        {
+          "name": "Admin update (uses newsId)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"EN updated title\",\n  \"excerpt\": \"EN updated excerpt\",\n  \"content\": \"EN updated content\",\n  \"translations\": [\n    { \"locale\": \"ro\", \"title\": \"RO updated titlu\", \"excerpt\": \"\", \"content\": \"RO updated continut\" },\n    { \"locale\": \"ru\", \"title\": \"RU updated название\", \"excerpt\": \"\", \"content\": \"RU updated контент\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/news/admin/{{newsId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "news", "admin", "{{newsId}}"]
+            }
+          }
+        },
+        {
+          "name": "Admin delete (uses newsId)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/news/admin/{{newsId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "news", "admin", "{{newsId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "News (Public)",
+      "item": [
+        {
+          "name": "Public list (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/news?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "news"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Public get by slug (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/news/{{newsSlug}}?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "news", "{{newsSlug}}"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Public get by slug (lang=ro)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/news/{{newsSlug}}?lang=ro",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "news", "{{newsSlug}}"],
+              "query": [{ "key": "lang", "value": "ro" }]
+            }
+          }
+        },
+        {
+          "name": "Public get by slug (lang=ru)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/news/{{newsSlug}}?lang=ru",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "news", "{{newsSlug}}"],
+              "query": [{ "key": "lang", "value": "ru" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

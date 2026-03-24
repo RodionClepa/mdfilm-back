@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import { directorService } from '../services/director.service.js';
+import { getReqLocale } from '../i18n/locale.js';
 
 class DirectorController {
   async getDirectors(req: Request, res: Response) {
     try {
-      const directors = await directorService.getAll();
+      const locale = getReqLocale(req);
+      const directors = await directorService.getAll(locale);
       res.json(directors);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch directors' });
@@ -13,7 +15,8 @@ class DirectorController {
 
   async getDirector(req: Request, res: Response) {
     try {
-      const director = await directorService.getById(Number(req.params.id));
+      const locale = getReqLocale(req);
+      const director = await directorService.getById(Number(req.params.id), locale);
       res.json(director);
     } catch (error: any) {
       res.status(404).json({ error: error.message ?? 'Director not found' });
@@ -49,7 +52,8 @@ class DirectorController {
 
   async getDirectorFilmography(req: Request, res: Response) {
     try {
-      const media = await directorService.getFilmography(Number(req.params.id));
+      const locale = getReqLocale(req);
+      const media = await directorService.getFilmography(Number(req.params.id), locale);
       res.json(media);
     } catch (error: any) {
       res.status(400).json({ error: error.message ?? 'Failed to fetch filmography' });

@@ -69,7 +69,25 @@ model Media {
 
   bookmarks Bookmark[]
 
+  translations MediaI18n[]
+
   @@map("Media")
+}
+
+model MediaI18n {
+  id        Int      @id @default(autoincrement())
+  mediaId   Int      @map("media_id")
+  locale    String
+  title     String
+  synopsis  String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, locale])
+  @@index([locale])
+  @@map("Media_I18n")
 }
 
 model Director {
@@ -82,6 +100,24 @@ model Director {
   imageUrl     String?
   placeOfBirth String?
   media        MediaDirector[]
+
+  translations DirectorI18n[]
+}
+
+model DirectorI18n {
+  id         Int      @id @default(autoincrement())
+  directorId Int      @map("director_id")
+  locale     String
+  name       String
+  biography  String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  director   Director @relation(fields: [directorId], references: [id], onDelete: Cascade)
+
+  @@unique([directorId, locale])
+  @@index([locale])
+  @@map("Director_I18n")
 }
 
 model MediaDirector {
@@ -107,7 +143,25 @@ model Person {
   placeOfBirth String?
   cast         MediaCast[]
 
+  translations PersonI18n[]
+
   @@map("People")
+}
+
+model PersonI18n {
+  id        Int      @id @default(autoincrement())
+  personId  Int      @map("person_id")
+  locale    String
+  name      String
+  biography String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, locale])
+  @@index([locale])
+  @@map("Person_I18n")
 }
 
 model MediaCast {
@@ -225,9 +279,38 @@ model Bookmark {
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-
   @@unique([userId, mediaId])
   @@index([userId, createdAt])
   @@index([mediaId])
   @@map("Bookmarks")
+}
+
+model News {
+  id            Int       @id @default(autoincrement())
+  slug          String    @unique
+  coverImageUrl String?   @map("cover_image_url")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  translations  NewsI18n[]
+
+  @@index([createdAt])
+  @@map("News")
+}
+
+model NewsI18n {
+  id        Int      @id @default(autoincrement())
+  newsId    Int      @map("news_id")
+  locale    String
+  title     String
+  excerpt   String?  @db.Text
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@unique([newsId, locale])
+  @@index([locale])
+  @@map("News_I18n")
 }

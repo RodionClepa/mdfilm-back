@@ -1,0 +1,653 @@
+{
+  "info": {
+    "name": "I18n Smoke Tests",
+    "_postman_id": "00000000-0000-0000-0000-0000000000i18",
+    "description": "Smoke-test localization via ?lang= (en/ro/ru) and fallback to en. Set collection variables (baseUrl, mediaId, movieId, seriesId, directorId, personId) to match your DB.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "adminUsername", "value": "" },
+    { "key": "adminPassword", "value": "" },
+    { "key": "token", "value": "" },
+    { "key": "lang", "value": "en" },
+    { "key": "mediaId", "value": "1" },
+    { "key": "movieId", "value": "1" },
+    { "key": "seriesId", "value": "1" },
+    { "key": "directorId", "value": "1" },
+    { "key": "personId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Admin login (stores token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.token) {",
+                  "  pm.collectionVariables.set('token', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/admin/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "admin", "login"]
+            }
+          }
+        },
+        {
+          "name": "Me (requires token)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Homepage",
+      "item": [
+        {
+          "name": "Featured (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/featured?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "featured"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Latest (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/latest?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "latest"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Upcoming (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/upcoming?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "upcoming"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Media",
+      "item": [
+        {
+          "name": "Get all media (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/media?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "media"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get media by id (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/media/{{mediaId}}?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "media", "{{mediaId}}"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get media directors (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/media/{{mediaId}}/directors?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "media", "{{mediaId}}", "directors"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get media cast (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/media/{{mediaId}}/cast?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "media", "{{mediaId}}", "cast"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "Get all movies (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/movies?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get movie by id (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/movies/{{movieId}}?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies", "{{movieId}}"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Series",
+      "item": [
+        {
+          "name": "Get all series (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/series?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "series"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get series by id (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/series/{{seriesId}}?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "series", "{{seriesId}}"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Directors",
+      "item": [
+        {
+          "name": "Get all directors (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/directors?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "directors"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get director by id (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/directors/{{directorId}}?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "directors", "{{directorId}}"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Director filmography (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/directors/{{directorId}}/filmography?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "directors", "{{directorId}}", "filmography"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "People",
+      "item": [
+        {
+          "name": "Get all people (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/people?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "people"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get person by id (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/people/{{personId}}?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "people", "{{personId}}"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        },
+        {
+          "name": "Person filmography (lang={{lang}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/people/{{personId}}/filmography?lang={{lang}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "people", "{{personId}}", "filmography"],
+              "query": [{ "key": "lang", "value": "{{lang}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CRUD (Admin)",
+      "item": [
+        {
+          "name": "Media",
+          "item": [
+            {
+              "name": "Create Media with translations (stores mediaId)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (json && json.id) {",
+                      "  pm.collectionVariables.set('mediaId', String(json.id));",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"typeName\": \"MOVIE\",\n  \"title\": \"EN title\",\n  \"releaseDate\": \"2025-01-01\",\n  \"synopsis\": \"EN synopsis\",\n  \"country\": \"US\",\n  \"duration\": 120,\n  \"budget\": 1000000,\n  \"translations\": [\n    { \"locale\": \"ro\", \"title\": \"RO titlu\", \"synopsis\": \"RO descriere\" },\n    { \"locale\": \"ru\", \"title\": \"RU название\", \"synopsis\": \"RU описание\" }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/media",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "media"]
+                }
+              }
+            },
+            {
+              "name": "Update Media with translations (uses mediaId)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"EN updated title\",\n  \"synopsis\": \"EN updated synopsis\",\n  \"translations\": [\n    { \"locale\": \"ro\", \"title\": \"RO updated titlu\", \"synopsis\": \"RO updated descriere\" },\n    { \"locale\": \"ru\", \"title\": \"RU updated название\", \"synopsis\": \"RU updated описание\" }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/media/{{mediaId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "media", "{{mediaId}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Media (uses mediaId)",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/media/{{mediaId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "media", "{{mediaId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Movies",
+          "item": [
+            {
+              "name": "Create Movie with translations (stores movieId)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (json && json.id) {",
+                      "  pm.collectionVariables.set('movieId', String(json.id));",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"EN movie title\",\n  \"releaseDate\": \"2025-01-01\",\n  \"synopsis\": \"EN movie synopsis\",\n  \"country\": \"US\",\n  \"posterImage\": \"\",\n  \"duration\": 120,\n  \"budget\": 1000000,\n  \"translations\": [\n    { \"locale\": \"ro\", \"title\": \"RO film\", \"synopsis\": \"RO descriere\" },\n    { \"locale\": \"ru\", \"title\": \"RU фильм\", \"synopsis\": \"RU описание\" }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/movies",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "movies"]
+                }
+              }
+            },
+            {
+              "name": "Update Movie with translations (uses movieId)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"EN movie updated\",\n  \"synopsis\": \"EN movie updated synopsis\",\n  \"duration\": 121,\n  \"translations\": [\n    { \"locale\": \"ro\", \"title\": \"RO film updated\", \"synopsis\": \"RO updated\" }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/movies/{{movieId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "movies", "{{movieId}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Movie (uses movieId)",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/movies/{{movieId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "movies", "{{movieId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Series",
+          "item": [
+            {
+              "name": "Create Series with translations (stores seriesId)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (json && json.id) {",
+                      "  pm.collectionVariables.set('seriesId', String(json.id));",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"EN series title\",\n  \"releaseDate\": \"2025-03-01\",\n  \"synopsis\": \"EN series synopsis\",\n  \"country\": \"US\",\n  \"posterImage\": \"\",\n  \"totalSeasons\": 2,\n  \"status\": \"ONGOING\",\n  \"firstAirDate\": \"2025-03-01\",\n  \"translations\": [\n    { \"locale\": \"ro\", \"title\": \"RO serial\", \"synopsis\": \"RO descriere\" },\n    { \"locale\": \"ru\", \"title\": \"RU сериал\", \"synopsis\": \"RU описание\" }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/series",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "series"]
+                }
+              }
+            },
+            {
+              "name": "Update Series with translations (uses seriesId)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"EN series updated\",\n  \"synopsis\": \"EN series updated synopsis\",\n  \"translations\": [\n    { \"locale\": \"ro\", \"title\": \"RO serial updated\", \"synopsis\": \"RO updated\" }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/series/{{seriesId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "series", "{{seriesId}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Series (uses seriesId)",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/series/{{seriesId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "series", "{{seriesId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Directors",
+          "item": [
+            {
+              "name": "Create Director with translations (stores directorId)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (json && json.id) {",
+                      "  pm.collectionVariables.set('directorId', String(json.id));",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"EN director\",\n  \"biography\": \"EN bio\",\n  \"translations\": [\n    { \"locale\": \"ro\", \"name\": \"RO regizor\", \"biography\": \"RO bio\" },\n    { \"locale\": \"ru\", \"name\": \"RU режиссер\", \"biography\": \"RU био\" }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/directors",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "directors"]
+                }
+              }
+            },
+            {
+              "name": "Update Director with translations (uses directorId)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"EN director updated\",\n  \"biography\": \"EN bio updated\",\n  \"translations\": [\n    { \"locale\": \"ro\", \"name\": \"RO regizor updated\", \"biography\": \"RO bio updated\" }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/directors/{{directorId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "directors", "{{directorId}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Director (uses directorId)",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/directors/{{directorId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "directors", "{{directorId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "People",
+          "item": [
+            {
+              "name": "Create Person with translations (stores personId)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (json && json.id) {",
+                      "  pm.collectionVariables.set('personId', String(json.id));",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"EN actor\",\n  \"biography\": \"EN actor bio\",\n  \"translations\": [\n    { \"locale\": \"ro\", \"name\": \"RO actor\", \"biography\": \"RO bio\" },\n    { \"locale\": \"ru\", \"name\": \"RU актер\", \"biography\": \"RU био\" }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/people",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "people"]
+                }
+              }
+            },
+            {
+              "name": "Update Person with translations (uses personId)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"EN actor updated\",\n  \"biography\": \"EN actor bio updated\",\n  \"translations\": [\n    { \"locale\": \"ro\", \"name\": \"RO actor updated\", \"biography\": \"RO bio updated\" }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/people/{{personId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "people", "{{personId}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Person (uses personId)",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/people/{{personId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "people", "{{personId}}"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

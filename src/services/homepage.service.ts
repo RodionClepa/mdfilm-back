@@ -1,23 +1,57 @@
 import { prisma } from '../../lib/prisma.js';
+import { Locale, pickTranslation } from '../i18n/locale.js';
 
 export class HomepageService {
-  async getFeaturedMediaPublic() {
+  async getFeaturedMediaPublic(locale: Locale) {
     const items = await prisma.homepageFeaturedMedia.findMany({
       where: { enabled: true },
       orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
       include: {
         media: {
           include: {
+            translations: { where: { locale: { in: [locale, 'en'] } } },
             type: true,
             movieInfo: true,
             seriesInfo: true,
-            directors: { include: { director: true } },
+            directors: {
+              include: {
+                director: {
+                  include: {
+                    translations: { where: { locale: { in: [locale, 'en'] } } },
+                  },
+                },
+              },
+            },
           },
         },
       },
     });
 
-    return items.map((i) => i.media);
+    return items.map((i) => {
+      const m: any = i.media;
+      const mt = pickTranslation(m.translations, locale);
+      const localizedDirectors = Array.isArray(m.directors)
+        ? m.directors.map((md: any) => {
+            const d: any = md.director;
+            const dt = pickTranslation(d?.translations, locale);
+            return {
+              ...md,
+              director: {
+                ...d,
+                name: dt?.name ?? d?.name,
+                biography: dt?.biography ?? d?.biography,
+              },
+            };
+          })
+        : m.directors;
+
+      return {
+        ...m,
+        title: mt?.title ?? m.title,
+        synopsis: mt?.synopsis ?? m.synopsis,
+        directors: localizedDirectors,
+      };
+    });
   }
 
   async getFeaturedMediaAdmin() {
@@ -78,7 +112,7 @@ export class HomepageService {
     return this.getFeaturedMediaAdmin();
   }
 
-  async getLatestMovies() {
+  async getLatestMovies(locale: Locale) {
     return prisma.media.findMany({
       where: {
         type: { name: 'MOVIE' },
@@ -86,14 +120,47 @@ export class HomepageService {
       },
       orderBy: { releaseDate: 'desc' },
       include: {
+        translations: { where: { locale: { in: [locale, 'en'] } } },
         type: true,
         movieInfo: true,
-        directors: { include: { director: true } },
+        directors: {
+          include: {
+            director: {
+              include: {
+                translations: { where: { locale: { in: [locale, 'en'] } } },
+              },
+            },
+          },
+        },
       },
-    });
+    }).then((rows: any[]) =>
+      rows.map((m: any) => {
+        const mt = pickTranslation(m.translations, locale);
+        const localizedDirectors = Array.isArray(m.directors)
+          ? m.directors.map((md: any) => {
+              const d: any = md.director;
+              const dt = pickTranslation(d?.translations, locale);
+              return {
+                ...md,
+                director: {
+                  ...d,
+                  name: dt?.name ?? d?.name,
+                  biography: dt?.biography ?? d?.biography,
+                },
+              };
+            })
+          : m.directors;
+        return {
+          ...m,
+          title: mt?.title ?? m.title,
+          synopsis: mt?.synopsis ?? m.synopsis,
+          directors: localizedDirectors,
+        };
+      }),
+    );
   }
 
-  async getLatestSeries() {
+  async getLatestSeries(locale: Locale) {
     return prisma.media.findMany({
       where: {
         type: { name: 'SERIES' },
@@ -101,14 +168,47 @@ export class HomepageService {
       },
       orderBy: { releaseDate: 'desc' },
       include: {
+        translations: { where: { locale: { in: [locale, 'en'] } } },
         type: true,
         seriesInfo: true,
-        directors: { include: { director: true } },
+        directors: {
+          include: {
+            director: {
+              include: {
+                translations: { where: { locale: { in: [locale, 'en'] } } },
+              },
+            },
+          },
+        },
       },
-    });
+    }).then((rows: any[]) =>
+      rows.map((m: any) => {
+        const mt = pickTranslation(m.translations, locale);
+        const localizedDirectors = Array.isArray(m.directors)
+          ? m.directors.map((md: any) => {
+              const d: any = md.director;
+              const dt = pickTranslation(d?.translations, locale);
+              return {
+                ...md,
+                director: {
+                  ...d,
+                  name: dt?.name ?? d?.name,
+                  biography: dt?.biography ?? d?.biography,
+                },
+              };
+            })
+          : m.directors;
+        return {
+          ...m,
+          title: mt?.title ?? m.title,
+          synopsis: mt?.synopsis ?? m.synopsis,
+          directors: localizedDirectors,
+        };
+      }),
+    );
   }
 
-  async getUpcomingMovies() {
+  async getUpcomingMovies(locale: Locale) {
     return prisma.media.findMany({
       where: {
         type: { name: 'MOVIE' },
@@ -116,14 +216,47 @@ export class HomepageService {
       },
       orderBy: { releaseDate: 'asc' },
       include: {
+        translations: { where: { locale: { in: [locale, 'en'] } } },
         type: true,
         movieInfo: true,
-        directors: { include: { director: true } },
+        directors: {
+          include: {
+            director: {
+              include: {
+                translations: { where: { locale: { in: [locale, 'en'] } } },
+              },
+            },
+          },
+        },
       },
-    });
+    }).then((rows: any[]) =>
+      rows.map((m: any) => {
+        const mt = pickTranslation(m.translations, locale);
+        const localizedDirectors = Array.isArray(m.directors)
+          ? m.directors.map((md: any) => {
+              const d: any = md.director;
+              const dt = pickTranslation(d?.translations, locale);
+              return {
+                ...md,
+                director: {
+                  ...d,
+                  name: dt?.name ?? d?.name,
+                  biography: dt?.biography ?? d?.biography,
+                },
+              };
+            })
+          : m.directors;
+        return {
+          ...m,
+          title: mt?.title ?? m.title,
+          synopsis: mt?.synopsis ?? m.synopsis,
+          directors: localizedDirectors,
+        };
+      }),
+    );
   }
 
-  async getUpcomingSeries() {
+  async getUpcomingSeries(locale: Locale) {
     return prisma.media.findMany({
       where: {
         type: { name: 'SERIES' },
@@ -131,11 +264,44 @@ export class HomepageService {
       },
       orderBy: { releaseDate: 'asc' },
       include: {
+        translations: { where: { locale: { in: [locale, 'en'] } } },
         type: true,
         seriesInfo: true,
-        directors: { include: { director: true } },
+        directors: {
+          include: {
+            director: {
+              include: {
+                translations: { where: { locale: { in: [locale, 'en'] } } },
+              },
+            },
+          },
+        },
       },
-    });
+    }).then((rows: any[]) =>
+      rows.map((m: any) => {
+        const mt = pickTranslation(m.translations, locale);
+        const localizedDirectors = Array.isArray(m.directors)
+          ? m.directors.map((md: any) => {
+              const d: any = md.director;
+              const dt = pickTranslation(d?.translations, locale);
+              return {
+                ...md,
+                director: {
+                  ...d,
+                  name: dt?.name ?? d?.name,
+                  biography: dt?.biography ?? d?.biography,
+                },
+              };
+            })
+          : m.directors;
+        return {
+          ...m,
+          title: mt?.title ?? m.title,
+          synopsis: mt?.synopsis ?? m.synopsis,
+          directors: localizedDirectors,
+        };
+      }),
+    );
   }
 }
 

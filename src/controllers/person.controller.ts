@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import { personService } from '../services/person.service.js';
+import { getReqLocale } from '../i18n/locale.js';
 
 class PersonController {
   async getPeople(req: Request, res: Response) {
     try {
-      const people = await personService.getAll();
+      const locale = getReqLocale(req);
+      const people = await personService.getAll(locale);
       res.json(people);
     } catch (error: any) {
       res
@@ -15,7 +17,8 @@ class PersonController {
 
   async getPerson(req: Request, res: Response) {
     try {
-      const person = await personService.getById(Number(req.params.id));
+      const locale = getReqLocale(req);
+      const person = await personService.getById(Number(req.params.id), locale);
       res.json(person);
     } catch (error: any) {
       res.status(404).json({ error: error.message ?? 'Person not found' });
@@ -51,7 +54,8 @@ class PersonController {
 
   async getPersonFilmography(req: Request, res: Response) {
     try {
-      const media = await personService.getFilmography(Number(req.params.id));
+      const locale = getReqLocale(req);
+      const media = await personService.getFilmography(Number(req.params.id), locale);
       res.json(media);
     } catch (error: any) {
       res.status(400).json({ error: error.message ?? 'Failed to fetch filmography' });

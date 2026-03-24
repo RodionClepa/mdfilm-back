@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import { homepageService } from '../services/homepage.service.js';
+import { getReqLocale } from '../i18n/locale.js';
 
 class HomepageController {
   async getFeatured(req: Request, res: Response) {
     try {
-      const items = await homepageService.getFeaturedMediaPublic();
+      const locale = getReqLocale(req);
+      const items = await homepageService.getFeaturedMediaPublic(locale);
       res.json(items);
     } catch (error: any) {
       res.status(500).json({ error: error?.message ?? 'Failed to fetch featured media' });
@@ -32,7 +34,8 @@ class HomepageController {
 
   async getLatestMovies(req: Request, res: Response) {
     try {
-      const items = await homepageService.getLatestMovies();
+      const locale = getReqLocale(req);
+      const items = await homepageService.getLatestMovies(locale);
       res.json(items);
     } catch (error: any) {
       res.status(500).json({ error: error?.message ?? 'Failed to fetch latest movies' });
@@ -41,7 +44,8 @@ class HomepageController {
 
   async getLatestSeries(req: Request, res: Response) {
     try {
-      const items = await homepageService.getLatestSeries();
+      const locale = getReqLocale(req);
+      const items = await homepageService.getLatestSeries(locale);
       res.json(items);
     } catch (error: any) {
       res.status(500).json({ error: error?.message ?? 'Failed to fetch latest series' });
@@ -50,7 +54,8 @@ class HomepageController {
 
   async getUpcomingMovies(req: Request, res: Response) {
     try {
-      const items = await homepageService.getUpcomingMovies();
+      const locale = getReqLocale(req);
+      const items = await homepageService.getUpcomingMovies(locale);
       res.json(items);
     } catch (error: any) {
       res.status(500).json({ error: error?.message ?? 'Failed to fetch upcoming movies' });
@@ -59,7 +64,8 @@ class HomepageController {
 
   async getUpcomingSeries(req: Request, res: Response) {
     try {
-      const items = await homepageService.getUpcomingSeries();
+      const locale = getReqLocale(req);
+      const items = await homepageService.getUpcomingSeries(locale);
       res.json(items);
     } catch (error: any) {
       res.status(500).json({ error: error?.message ?? 'Failed to fetch upcoming series' });
