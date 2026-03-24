@@ -2,6 +2,8 @@ import { api } from './api';
 import type { Bookmark, Director, Media, MediaCast, MediaDirector, Person, News } from './types';
 import type { PublicLang } from './publicLang';
 
+type Paged<T> = { items: T[]; page: number; pageSize: number; total: number };
+
 function addLang(path: string, lang: PublicLang) {
   if (!lang || lang === 'en') return path;
   const sep = path.includes('?') ? '&' : '?';
@@ -33,11 +35,63 @@ export const publicEndpoints = {
   movies: {
     list: (lang: PublicLang) => api<Media[]>(addLang('/api/movies', lang)),
     get: (id: number, lang: PublicLang) => api<Media>(addLang(`/api/movies/${id}`, lang)),
+    browse: (
+      lang: PublicLang,
+      params: {
+        az?: string;
+        yearFrom?: number;
+        yearTo?: number;
+        dateFrom?: string;
+        dateTo?: string;
+        sort?: 'latest' | 'oldest' | 'title_asc' | 'title_desc' | string;
+        page?: number;
+        pageSize?: number;
+      },
+    ) => {
+      const sp = new URLSearchParams();
+      if (params?.az) sp.set('az', params.az);
+      if (params?.yearFrom != null) sp.set('yearFrom', String(params.yearFrom));
+      if (params?.yearTo != null) sp.set('yearTo', String(params.yearTo));
+      if (params?.dateFrom) sp.set('dateFrom', String(params.dateFrom));
+      if (params?.dateTo) sp.set('dateTo', String(params.dateTo));
+      if (params?.sort) sp.set('sort', String(params.sort));
+      if (params?.page != null) sp.set('page', String(params.page));
+      if (params?.pageSize != null) sp.set('pageSize', String(params.pageSize));
+      const qs = sp.toString();
+      return api<Paged<Media>>(addLang(`/api/movies${qs ? `?${qs}` : ''}`, lang));
+    },
   },
 
   series: {
     list: (lang: PublicLang) => api<Media[]>(addLang('/api/series', lang)),
     get: (id: number, lang: PublicLang) => api<Media>(addLang(`/api/series/${id}`, lang)),
+    browse: (
+      lang: PublicLang,
+      params: {
+        az?: string;
+        yearFrom?: number;
+        yearTo?: number;
+        dateFrom?: string;
+        dateTo?: string;
+        status?: 'ONGOING' | 'ENDED' | 'UPCOMING' | string;
+        sort?: 'latest' | 'oldest' | 'title_asc' | 'title_desc' | string;
+        page?: number;
+        pageSize?: number;
+      },
+    ) => {
+      const sp = new URLSearchParams();
+      if (params?.az) sp.set('az', params.az);
+      if (params?.yearFrom != null) sp.set('yearFrom', String(params.yearFrom));
+      if (params?.yearTo != null) sp.set('yearTo', String(params.yearTo));
+      if (params?.dateFrom) sp.set('dateFrom', String(params.dateFrom));
+      if (params?.dateTo) sp.set('dateTo', String(params.dateTo));
+      if (params?.status) sp.set('status', String(params.status));
+      if (params?.sort) sp.set('sort', String(params.sort));
+      if (params?.page != null) sp.set('page', String(params.page));
+      if (params?.pageSize != null) sp.set('pageSize', String(params.pageSize));
+      const qs = sp.toString();
+      return api<Paged<Media>>(addLang(`/api/series${qs ? `?${qs}` : ''}`, lang));
+    },
   },
 
   directors: {

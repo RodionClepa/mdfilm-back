@@ -42,6 +42,11 @@ enum Role {
   ADMIN
 }
 
+enum SeriesStatus {
+  ONGOING
+  ENDED
+}
+
 // --- Main Models ---
 
 model Media {
@@ -191,7 +196,7 @@ model MovieInfo {
 model SeriesInfo {
   mediaId      Int       @id @unique @map("media_id")
   totalSeasons Int       @default(1) @map("total_seasons")
-  status       String?
+  status       SeriesStatus?
   firstAirDate DateTime  @map("first_air_date")
   lastAirDate  DateTime? @map("last_air_date")
   

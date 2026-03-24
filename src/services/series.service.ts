@@ -1,7 +1,165 @@
 import { prisma } from '../../lib/prisma.js';
 import { Locale, parseLocaleStrict, pickTranslation } from '../i18n/locale.js';
+import type { SeriesStatus } from '../../generated/prisma/client.js';
+
+function parseSeriesStatus(input: any): SeriesStatus | null | undefined {
+  if (input === undefined) return undefined;
+  if (input === null) return null;
+  const v = String(input).trim().toUpperCase();
+  if (v === 'ONGOING' || v === 'ENDED') return v as SeriesStatus;
+  throw new Error(`Unsupported series status '${input}'`);
+}
+
+function parseSeriesStatusFilter(input: any): SeriesStatus | 'UPCOMING' | undefined {
+  if (input === undefined || input === null || String(input).trim() === '') return undefined;
+  const v = String(input).trim().toUpperCase();
+  if (v === 'ONGOING' || v === 'ENDED') return v as SeriesStatus;
+  if (v === 'UPCOMING') return 'UPCOMING';
+  throw new Error(`Unsupported series status filter '${input}'`);
+}
 
 export class SeriesService {
+  async browse(
+    locale: Locale,
+    params: {
+      az?: string;
+      yearFrom?: number;
+      yearTo?: number;
+      dateFrom?: string;
+      dateTo?: string;
+      sort?: string;
+      page?: number;
+      pageSize?: number;
+      status?: string;
+    },
+  ) {
+    const pageSizeRaw = params.pageSize ?? 24;
+    const pageRaw = params.page ?? 1;
+    const pageSize = Number.isFinite(pageSizeRaw)
+      ? Math.max(1, Math.min(100, Number(pageSizeRaw)))
+      : 24;
+    const page = Number.isFinite(pageRaw) ? Math.max(1, Number(pageRaw)) : 1;
+    const skip = (page - 1) * pageSize;
+
+    const az = typeof params.az === 'string' ? params.az.trim() : '';
+    const azLetter = /^[a-z]$/i.test(az) ? az[0].toLowerCase() : undefined;
+
+    const yearFrom =
+      params.yearFrom != null && Number.isFinite(params.yearFrom)
+        ? Number(params.yearFrom)
+        : undefined;
+    const yearTo =
+      params.yearTo != null && Number.isFinite(params.yearTo)
+        ? Number(params.yearTo)
+        : undefined;
+
+    const dateFromRaw = typeof params.dateFrom === 'string' ? params.dateFrom.trim() : '';
+    const dateToRaw = typeof params.dateTo === 'string' ? params.dateTo.trim() : '';
+    const dateFrom = dateFromRaw ? new Date(dateFromRaw) : undefined;
+    const dateTo = dateToRaw ? new Date(dateToRaw) : undefined;
+
+    const status = parseSeriesStatusFilter(params.status);
+
+    const where: any = {
+      type: { name: 'SERIES' },
+      ...(status && status !== 'UPCOMING' ? { seriesInfo: { status } } : {}),
+    };
+
+    const and: any[] = [];
+
+    if (status === 'UPCOMING') {
+      and.push({ seriesInfo: { firstAirDate: { gt: new Date() } } });
+    }
+
+    if (yearFrom != null || yearTo != null) {
+      const from = yearFrom != null ? new Date(Date.UTC(yearFrom, 0, 1)) : undefined;
+      const to = yearTo != null ? new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999)) : undefined;
+      and.push({
+        releaseDate: {
+          ...(from ? { gte: from } : {}),
+          ...(to ? { lte: to } : {}),
+        },
+      });
+    }
+
+    if ((dateFrom && !Number.isNaN(dateFrom.valueOf())) || (dateTo && !Number.isNaN(dateTo.valueOf()))) {
+      and.push({
+        releaseDate: {
+          ...(dateFrom && !Number.isNaN(dateFrom.valueOf()) ? { gte: dateFrom } : {}),
+          ...(dateTo && !Number.isNaN(dateTo.valueOf()) ? { lte: dateTo } : {}),
+        },
+      });
+    }
+
+    if (azLetter) {
+      and.push({
+        OR: [
+          {
+            translations: {
+              some: {
+                locale,
+                title: { startsWith: azLetter, mode: 'insensitive' },
+              },
+            },
+          },
+          {
+            AND: [
+              { translations: { none: { locale } } },
+              {
+                translations: {
+                  some: {
+                    locale: 'en',
+                    title: { startsWith: azLetter, mode: 'insensitive' },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      });
+    }
+
+    if (and.length) where.AND = and;
+
+    const orderBy: any[] = [];
+    const sort = typeof params.sort === 'string' ? params.sort.trim() : '';
+    if (sort === 'oldest') orderBy.push({ releaseDate: 'asc' });
+    else if (sort === 'title_asc') orderBy.push({ title: 'asc' });
+    else if (sort === 'title_desc') orderBy.push({ title: 'desc' });
+    else orderBy.push({ releaseDate: 'desc' });
+
+    const [total, rows] = await Promise.all([
+      prisma.media.count({ where }),
+      prisma.media.findMany({
+        where,
+        orderBy,
+        skip,
+        take: pageSize,
+        include: {
+          translations: { where: { locale: { in: [locale, 'en'] } } },
+          seriesInfo: true,
+          type: true,
+          directors: {
+            include: {
+              director: {
+                include: {
+                  translations: { where: { locale: { in: [locale, 'en'] } } },
+                },
+              },
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      items: rows.map((m: any) => this._localizeMedia(m, locale)),
+      page,
+      pageSize,
+      total,
+    };
+  }
+
   private async _upsertMediaTranslations(mediaId: number, translations: any) {
     if (!Array.isArray(translations) || translations.length === 0) return;
 
@@ -149,7 +307,7 @@ export class SeriesService {
           create: {
             totalSeasons:
               data.totalSeasons ?? data.seriesInfo?.totalSeasons ?? 1,
-            status: data.status ?? data.seriesInfo?.status,
+            status: parseSeriesStatus(data.status ?? data.seriesInfo?.status),
             firstAirDate: new Date(firstAirDate),
             lastAirDate: lastAirDate ? new Date(lastAirDate) : null,
           },
@@ -195,7 +353,7 @@ export class SeriesService {
         seriesInfo: {
           update: {
             totalSeasons: data.totalSeasons ?? data.seriesInfo?.totalSeasons,
-            status: data.status ?? data.seriesInfo?.status,
+            status: parseSeriesStatus(data.status ?? data.seriesInfo?.status),
             firstAirDate: data.firstAirDate
               ? new Date(data.firstAirDate)
               : data.seriesInfo?.firstAirDate

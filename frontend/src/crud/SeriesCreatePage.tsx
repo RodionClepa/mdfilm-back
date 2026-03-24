@@ -136,7 +136,11 @@ export function SeriesCreatePage() {
       </div>
       <div className="row">
         <div className="muted">status</div>
-        <input value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))} placeholder="optional" />
+        <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}>
+          <option value="">(optional)</option>
+          <option value="ONGOING">ONGOING</option>
+          <option value="ENDED">ENDED</option>
+        </select>
       </div>
       <div className="row">
         <div className="muted">directorId</div>

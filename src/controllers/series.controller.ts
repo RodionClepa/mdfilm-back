@@ -6,8 +6,46 @@ class SeriesController {
   async getSeries(req: Request, res: Response) {
     try {
       const locale = getReqLocale(req);
-      const series = await seriesService.getAll(locale);
-      res.json(series);
+      const q: any = req.query as any;
+      const hasBrowseParams =
+        q?.az !== undefined ||
+        q?.yearFrom !== undefined ||
+        q?.yearTo !== undefined ||
+        q?.dateFrom !== undefined ||
+        q?.dateTo !== undefined ||
+        q?.sort !== undefined ||
+        q?.status !== undefined ||
+        q?.page !== undefined ||
+        q?.pageSize !== undefined;
+
+      if (!hasBrowseParams) {
+        const series = await seriesService.getAll(locale);
+        res.json(series);
+        return;
+      }
+
+      const page = q?.page != null ? Number(q.page) : undefined;
+      const pageSize = q?.pageSize != null ? Number(q.pageSize) : undefined;
+      const yearFrom = q?.yearFrom != null ? Number(q.yearFrom) : undefined;
+      const yearTo = q?.yearTo != null ? Number(q.yearTo) : undefined;
+      const dateFrom = q?.dateFrom != null ? String(q.dateFrom) : undefined;
+      const dateTo = q?.dateTo != null ? String(q.dateTo) : undefined;
+      const az = q?.az != null ? String(q.az) : undefined;
+      const sort = q?.sort != null ? String(q.sort) : undefined;
+      const status = q?.status != null ? String(q.status) : undefined;
+
+      const result = await seriesService.browse(locale, {
+        az,
+        yearFrom,
+        yearTo,
+        dateFrom,
+        dateTo,
+        sort,
+        status,
+        page,
+        pageSize,
+      });
+      res.json(result);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch series' });
     }
