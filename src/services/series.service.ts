@@ -176,6 +176,10 @@ export class SeriesService {
               t?.synopsis != null && String(t.synopsis).trim() !== ''
                 ? String(t.synopsis)
                 : null,
+            productionNotes:
+              t?.productionNotes != null && String(t.productionNotes).trim() !== ''
+                ? String(t.productionNotes)
+                : null,
           },
           create: {
             mediaId,
@@ -184,6 +188,10 @@ export class SeriesService {
             synopsis:
               t?.synopsis != null && String(t.synopsis).trim() !== ''
                 ? String(t.synopsis)
+                : null,
+            productionNotes:
+              t?.productionNotes != null && String(t.productionNotes).trim() !== ''
+                ? String(t.productionNotes)
                 : null,
           },
         });
@@ -214,6 +222,7 @@ export class SeriesService {
       ...m,
       title: mt?.title ?? m?.title,
       synopsis: mt?.synopsis ?? m?.synopsis,
+      productionNotes: mt?.productionNotes ?? m?.productionNotes,
       directors: localizedDirectors,
     };
   }
@@ -300,6 +309,7 @@ export class SeriesService {
         title: data.title,
         releaseDate: new Date(data.releaseDate),
         synopsis: data.synopsis,
+        productionNotes: data.productionNotes,
         country: data.country,
         posterImage: data.posterImage,
         typeId: seriesType.id,
@@ -321,12 +331,20 @@ export class SeriesService {
       update: {
         title: String(data.title),
         synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        productionNotes:
+          data?.productionNotes != null && String(data.productionNotes).trim() !== ''
+            ? String(data.productionNotes)
+            : null,
       },
       create: {
         mediaId: created.id,
         locale: 'en',
         title: String(data.title),
         synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        productionNotes:
+          data?.productionNotes != null && String(data.productionNotes).trim() !== ''
+            ? String(data.productionNotes)
+            : null,
       },
     });
 
@@ -347,6 +365,7 @@ export class SeriesService {
       data: {
         title: data.title,
         synopsis: data.synopsis,
+        productionNotes: data.productionNotes,
         country: data.country,
         posterImage: data.posterImage,
         releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
@@ -380,12 +399,20 @@ export class SeriesService {
       update: {
         title: String(data.title),
         synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        productionNotes:
+          data?.productionNotes != null && String(data.productionNotes).trim() !== ''
+            ? String(data.productionNotes)
+            : null,
       },
       create: {
         mediaId: id,
         locale: 'en',
         title: String(data.title),
         synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        productionNotes:
+          data?.productionNotes != null && String(data.productionNotes).trim() !== ''
+            ? String(data.productionNotes)
+            : null,
       },
     });
 

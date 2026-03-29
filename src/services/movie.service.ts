@@ -48,7 +48,9 @@ export class MovieService {
 
     if (yearFrom != null || yearTo != null) {
       const from = yearFrom != null ? new Date(Date.UTC(yearFrom, 0, 1)) : undefined;
-      const to = yearTo != null ? new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999)) : undefined;
+      const to = yearTo != null
+        ? new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999))
+        : undefined;
       and.push({
         releaseDate: {
           ...(from ? { gte: from } : {}),
@@ -57,7 +59,10 @@ export class MovieService {
       });
     }
 
-    if ((dateFrom && !Number.isNaN(dateFrom.valueOf())) || (dateTo && !Number.isNaN(dateTo.valueOf()))) {
+    if (
+      (dateFrom && !Number.isNaN(dateFrom.valueOf())) ||
+      (dateTo && !Number.isNaN(dateTo.valueOf()))
+    ) {
       and.push({
         releaseDate: {
           ...(dateFrom && !Number.isNaN(dateFrom.valueOf()) ? { gte: dateFrom } : {}),
@@ -67,9 +72,6 @@ export class MovieService {
     }
 
     if (azLetter) {
-      // i18n-aware A-Z:
-      // - If locale translation exists: filter by that title
-      // - Else: fallback to EN title
       and.push({
         OR: [
           {
@@ -161,18 +163,16 @@ export class MovieService {
       ...m,
       title: mt?.title ?? m?.title,
       synopsis: mt?.synopsis ?? m?.synopsis,
+      productionNotes: mt?.productionNotes ?? m?.productionNotes,
       directors: localizedDirectors,
     };
   }
 
-  /**
-   * Helper method to verify a movie exists and is actually a MOVIE
-   */
   private async _ensureMovieExists(id: number, locale: Locale) {
     const movie = await prisma.media.findFirst({
       where: {
         id,
-        type: { name: 'MOVIE' }
+        type: { name: 'MOVIE' },
       },
       include: {
         translations: { where: { locale: { in: [locale, 'en'] } } },
@@ -193,6 +193,7 @@ export class MovieService {
     if (!movie) {
       throw new Error(`Movie with ID ${id} not found.`);
     }
+
     return this._localizeMedia(movie, locale);
   }
 
@@ -212,6 +213,10 @@ export class MovieService {
               t?.synopsis != null && String(t.synopsis).trim() !== ''
                 ? String(t.synopsis)
                 : null,
+            productionNotes:
+              t?.productionNotes != null && String(t.productionNotes).trim() !== ''
+                ? String(t.productionNotes)
+                : null,
           },
           create: {
             mediaId,
@@ -220,6 +225,10 @@ export class MovieService {
             synopsis:
               t?.synopsis != null && String(t.synopsis).trim() !== ''
                 ? String(t.synopsis)
+                : null,
+            productionNotes:
+              t?.productionNotes != null && String(t.productionNotes).trim() !== ''
+                ? String(t.productionNotes)
                 : null,
           },
         });
@@ -248,19 +257,14 @@ export class MovieService {
   }
 
   async getById(id: number, locale: Locale) {
-    if (!id) throw new Error("ID is required.");
-
-    // Using our helper to ensure existence and type safety
-    const movie = await this._ensureMovieExists(id, locale);
-
-    return movie;
+    if (!id) throw new Error('ID is required.');
+    return this._ensureMovieExists(id, locale);
   }
 
   async create(data: any) {
-    // 1. Basic field validation
-    if (!data.title) throw new Error("Title is required.");
+    if (!data?.title) throw new Error('Title is required.');
+    if (!data?.releaseDate) throw new Error('releaseDate is required.');
 
-    // 2. Lookup Type ID
     const movieType = await prisma.mediaType.findUnique({
       where: { name: 'MOVIE' },
     });
@@ -274,6 +278,7 @@ export class MovieService {
         title: data.title,
         releaseDate: new Date(data.releaseDate),
         synopsis: data.synopsis,
+        productionNotes: data.productionNotes,
         country: data.country,
         posterImage: data.posterImage,
         typeId: movieType.id,
@@ -291,13 +296,27 @@ export class MovieService {
       where: { mediaId_locale: { mediaId: created.id, locale: 'en' } },
       update: {
         title: String(data.title),
-        synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        synopsis:
+          data?.synopsis != null && String(data.synopsis).trim() !== ''
+            ? String(data.synopsis)
+            : null,
+        productionNotes:
+          data?.productionNotes != null && String(data.productionNotes).trim() !== ''
+            ? String(data.productionNotes)
+            : null,
       },
       create: {
         mediaId: created.id,
         locale: 'en',
         title: String(data.title),
-        synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        synopsis:
+          data?.synopsis != null && String(data.synopsis).trim() !== ''
+            ? String(data.synopsis)
+            : null,
+        productionNotes:
+          data?.productionNotes != null && String(data.productionNotes).trim() !== ''
+            ? String(data.productionNotes)
+            : null,
       },
     });
 
@@ -309,9 +328,8 @@ export class MovieService {
   }
 
   async update(id: number, data: any) {
-    if (!id) throw new Error("ID is required.");
+    if (!id) throw new Error('ID is required.');
 
-    // Ensure the record exists and is a movie before updating
     await this._ensureMovieExists(id, 'en');
 
     const updated = await prisma.media.update({
@@ -319,6 +337,7 @@ export class MovieService {
       data: {
         title: data.title,
         synopsis: data.synopsis,
+        productionNotes: data.productionNotes,
         country: data.country,
         posterImage: data.posterImage,
         releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
@@ -329,20 +348,34 @@ export class MovieService {
           },
         },
       },
-      include: { movieInfo: true }
+      include: { movieInfo: true },
     });
 
     await prisma.mediaI18n.upsert({
       where: { mediaId_locale: { mediaId: id, locale: 'en' } },
       update: {
         title: String(data.title),
-        synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        synopsis:
+          data?.synopsis != null && String(data.synopsis).trim() !== ''
+            ? String(data.synopsis)
+            : null,
+        productionNotes:
+          data?.productionNotes != null && String(data.productionNotes).trim() !== ''
+            ? String(data.productionNotes)
+            : null,
       },
       create: {
         mediaId: id,
         locale: 'en',
         title: String(data.title),
-        synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        synopsis:
+          data?.synopsis != null && String(data.synopsis).trim() !== ''
+            ? String(data.synopsis)
+            : null,
+        productionNotes:
+          data?.productionNotes != null && String(data.productionNotes).trim() !== ''
+            ? String(data.productionNotes)
+            : null,
       },
     });
 
@@ -354,15 +387,12 @@ export class MovieService {
   }
 
   async delete(id: number) {
-    if (!id) throw new Error("ID is required.");
+    if (!id) throw new Error('ID is required.');
 
-    // Ensure it exists and is a movie
     await this._ensureMovieExists(id, 'en');
 
-    // Prisma will delete the related MovieInfo automatically 
-    // if you set onDelete: Cascade in schema, otherwise it handles it here.
     return prisma.media.delete({
-      where: { id }
+      where: { id },
     });
   }
 }

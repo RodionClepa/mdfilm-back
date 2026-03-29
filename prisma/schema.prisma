@@ -54,6 +54,7 @@ model Media {
   title       String
   releaseDate DateTime  @map("release_date")
   synopsis    String?   @db.Text
+  productionNotes String? @db.Text @map("production_notes")
   country     String?
   posterImage String?   @map("poster_image")
   
@@ -85,6 +86,7 @@ model MediaI18n {
   locale    String
   title     String
   synopsis  String?  @db.Text
+  productionNotes String? @db.Text @map("production_notes")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

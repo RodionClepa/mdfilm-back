@@ -9,6 +9,7 @@ interface BaseMediaCreateInput {
   title: string;
   releaseDate: string | Date;
   synopsis?: string;
+  productionNotes?: string;
   country?: string;
   posterImage?: string;
   directorId?: number;
@@ -69,6 +70,10 @@ export class MediaService {
               t?.synopsis != null && String(t.synopsis).trim() !== ''
                 ? String(t.synopsis)
                 : null,
+            productionNotes:
+              t?.productionNotes != null && String(t.productionNotes).trim() !== ''
+                ? String(t.productionNotes)
+                : null,
           },
           create: {
             mediaId,
@@ -77,6 +82,10 @@ export class MediaService {
             synopsis:
               t?.synopsis != null && String(t.synopsis).trim() !== ''
                 ? String(t.synopsis)
+                : null,
+            productionNotes:
+              t?.productionNotes != null && String(t.productionNotes).trim() !== ''
+                ? String(t.productionNotes)
                 : null,
           },
         });
@@ -123,6 +132,7 @@ export class MediaService {
       ...m,
       title: mt?.title ?? m?.title,
       synopsis: mt?.synopsis ?? m?.synopsis,
+      productionNotes: mt?.productionNotes ?? m?.productionNotes,
       directors,
       cast,
     };
@@ -432,6 +442,7 @@ export class MediaService {
       title: data.title,
       releaseDate,
       synopsis: data.synopsis,
+      productionNotes: data.productionNotes,
       country: data.country,
       posterImage: data.posterImage,
       typeId: mediaType.id,
@@ -453,12 +464,20 @@ export class MediaService {
       update: {
         title: String(data.title),
         synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        productionNotes:
+          (data as any)?.productionNotes != null && String((data as any).productionNotes).trim() !== ''
+            ? String((data as any).productionNotes)
+            : null,
       },
       create: {
         mediaId: created.id,
         locale: 'en',
         title: String(data.title),
         synopsis: data?.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+        productionNotes:
+          (data as any)?.productionNotes != null && String((data as any).productionNotes).trim() !== ''
+            ? String((data as any).productionNotes)
+            : null,
       },
     });
 
@@ -477,6 +496,7 @@ export class MediaService {
     const updateData: any = {
       title: data.title,
       synopsis: data.synopsis,
+      productionNotes: data.productionNotes,
       country: data.country,
       posterImage: data.posterImage,
     };
@@ -500,13 +520,27 @@ export class MediaService {
       },
     });
 
-    if (data.title !== undefined || data.synopsis !== undefined) {
+    if (data.title !== undefined || data.synopsis !== undefined || (data as any).productionNotes !== undefined) {
       await prisma.mediaI18n.upsert({
         where: { mediaId_locale: { mediaId: id, locale: 'en' } },
         update: {
           ...(data.title !== undefined ? { title: String(data.title) } : {}),
           ...(data.synopsis !== undefined
-            ? { synopsis: data.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null }
+            ? {
+                synopsis:
+                  data.synopsis != null && String(data.synopsis).trim() !== ''
+                    ? String(data.synopsis)
+                    : null,
+              }
+            : {}),
+          ...((data as any).productionNotes !== undefined
+            ? {
+                productionNotes:
+                  (data as any).productionNotes != null &&
+                  String((data as any).productionNotes).trim() !== ''
+                    ? String((data as any).productionNotes)
+                    : null,
+              }
             : {}),
         },
         create: {
@@ -514,7 +548,13 @@ export class MediaService {
           locale: 'en',
           title: data.title != null ? String(data.title) : '',
           synopsis:
-            data.synopsis != null && String(data.synopsis).trim() !== '' ? String(data.synopsis) : null,
+            data.synopsis != null && String(data.synopsis).trim() !== ''
+              ? String(data.synopsis)
+              : null,
+          productionNotes:
+            (data as any).productionNotes != null && String((data as any).productionNotes).trim() !== ''
+              ? String((data as any).productionNotes)
+              : null,
         },
       });
     }

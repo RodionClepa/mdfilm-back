@@ -18,14 +18,15 @@ export function MediaCreatePage() {
   const [error, setError] = useState<string | null>(null);
 
   const [i18nEnabled, setI18nEnabled] = useState({ ro: false, ru: false });
-  const [i18nRo, setI18nRo] = useState({ title: '', synopsis: '' });
-  const [i18nRu, setI18nRu] = useState({ title: '', synopsis: '' });
+  const [i18nRo, setI18nRo] = useState({ title: '', synopsis: '', productionNotes: '' });
+  const [i18nRu, setI18nRu] = useState({ title: '', synopsis: '', productionNotes: '' });
 
   const [form, setForm] = useState({
     typeName: 'MEDIA' as MediaTypeName,
     title: '',
     releaseDate: '',
     synopsis: '',
+    productionNotes: '',
     country: '',
     posterImage: '',
     directorId: '',
@@ -61,6 +62,7 @@ export function MediaCreatePage() {
         title: form.title,
         releaseDate: form.releaseDate,
         synopsis: form.synopsis || undefined,
+        productionNotes: form.productionNotes || undefined,
         country: form.country || undefined,
         posterImage: form.posterImage || undefined,
         directorId: numOrUndefined(form.directorId),
@@ -119,9 +121,10 @@ export function MediaCreatePage() {
         fields={[
           { key: 'title', label: 'title' },
           { key: 'synopsis', label: 'synopsis', multiline: true },
+          { key: 'productionNotes', label: 'productionNotes', multiline: true },
         ]}
         requiredKeys={['title']}
-        en={{ title: form.title, synopsis: form.synopsis }}
+        en={{ title: form.title, synopsis: form.synopsis, productionNotes: form.productionNotes }}
         ro={i18nRo}
         ru={i18nRu}
         enabled={i18nEnabled}
@@ -130,10 +133,23 @@ export function MediaCreatePage() {
             ...f,
             title: String(next.title ?? ''),
             synopsis: String(next.synopsis ?? ''),
+            productionNotes: String(next.productionNotes ?? ''),
           }))
         }
-        onChangeRo={(next) => setI18nRo({ title: String(next.title ?? ''), synopsis: String(next.synopsis ?? '') })}
-        onChangeRu={(next) => setI18nRu({ title: String(next.title ?? ''), synopsis: String(next.synopsis ?? '') })}
+        onChangeRo={(next) =>
+          setI18nRo({
+            title: String(next.title ?? ''),
+            synopsis: String(next.synopsis ?? ''),
+            productionNotes: String(next.productionNotes ?? ''),
+          })
+        }
+        onChangeRu={(next) =>
+          setI18nRu({
+            title: String(next.title ?? ''),
+            synopsis: String(next.synopsis ?? ''),
+            productionNotes: String(next.productionNotes ?? ''),
+          })
+        }
         onChangeEnabled={setI18nEnabled}
       />
 

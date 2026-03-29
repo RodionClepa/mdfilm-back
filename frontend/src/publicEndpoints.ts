@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { Bookmark, Director, Media, MediaCast, MediaDirector, Person, News } from './types';
+import type { Bookmark, Director, Media, MediaCast, MediaDirector, Person, News, Season, Episode } from './types';
 import type { PublicLang } from './publicLang';
 
 type Paged<T> = { items: T[]; page: number; pageSize: number; total: number };
@@ -92,6 +92,14 @@ export const publicEndpoints = {
       const qs = sp.toString();
       return api<Paged<Media>>(addLang(`/api/series${qs ? `?${qs}` : ''}`, lang));
     },
+  },
+
+  seasons: {
+    listBySeries: (seriesId: number) => api<Season[]>(`/api/series/${seriesId}/seasons`),
+  },
+
+  episodes: {
+    listBySeason: (seasonId: number) => api<Episode[]>(`/api/seasons/${seasonId}/episodes`),
   },
 
   directors: {

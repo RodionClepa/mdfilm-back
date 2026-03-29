@@ -61,6 +61,14 @@ const DICT: I18n = {
     title_no_cast: 'No cast attached.',
     title_cast_fallback: 'Cast',
 
+    title_production_notes: 'Production notes',
+    title_no_production_notes: 'No production notes yet.',
+
+    title_seasons: 'Seasons',
+    title_no_seasons: 'No seasons yet.',
+    title_episodes: 'Episodes',
+    title_no_episodes: 'No episodes yet.',
+
     poster_fallback: 'No poster',
     release_chip: 'Release',
     type_chip: 'Type',
@@ -184,6 +192,14 @@ const DICT: I18n = {
     title_no_cast: 'Nu este atașată distribuție.',
     title_cast_fallback: 'Distribuție',
 
+    title_production_notes: 'Note de producție',
+    title_no_production_notes: 'Nu există note de producție încă.',
+
+    title_seasons: 'Sezoane',
+    title_no_seasons: 'Nu există sezoane încă.',
+    title_episodes: 'Episoade',
+    title_no_episodes: 'Nu există episoade încă.',
+
     poster_fallback: 'Fără poster',
     release_chip: 'Lansare',
     type_chip: 'Tip',
@@ -302,10 +318,18 @@ const DICT: I18n = {
     title_overview: 'Описание',
     title_no_synopsis: 'Описание отсутствует.',
     title_directors: 'Режиссёры',
-    title_no_directors: 'Режиссёры не указаны.',
+    title_no_directors: 'Режиссёры не добавлены.',
     title_top_cast: 'Актёры',
-    title_no_cast: 'Актёры не указаны.',
+    title_no_cast: 'Актёры не добавлены.',
     title_cast_fallback: 'Актёры',
+
+    title_production_notes: 'Заметки о производстве',
+    title_no_production_notes: 'Заметок о производстве пока нет.',
+
+    title_seasons: 'Сезоны',
+    title_no_seasons: 'Сезонов пока нет.',
+    title_episodes: 'Эпизоды',
+    title_no_episodes: 'Эпизодов пока нет.',
 
     poster_fallback: 'Нет постера',
     release_chip: 'Релиз',

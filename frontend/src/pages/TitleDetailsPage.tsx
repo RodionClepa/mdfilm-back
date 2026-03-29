@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ApiError } from '../api';
 import { publicEndpoints } from '../publicEndpoints';
-import type { Media, MediaCast, MediaDirector } from '../types';
+import type { Episode, Media, MediaCast, MediaDirector, Season } from '../types';
 import '../App.css';
 import { usePublicLang } from '../publicLang';
 import { t, tMediaType } from '../publicI18n';
@@ -22,6 +22,13 @@ function fmtDate(d?: string | null) {
   }
 }
 
+function fmtMinutes(v?: number | null) {
+  if (v == null) return '';
+  const n = Number(v);
+  if (!Number.isFinite(n) || n <= 0) return '';
+  return `${n} min`;
+}
+
 export function TitleDetailsPage() {
   const params = useParams();
   const id = Number(params.id);
@@ -31,6 +38,8 @@ export function TitleDetailsPage() {
   const [item, setItem] = useState<Media | null>(null);
   const [directors, setDirectors] = useState<MediaDirector[]>([]);
   const [cast, setCast] = useState<MediaCast[]>([]);
+  const [seasons, setSeasons] = useState<Season[]>([]);
+  const [episodesBySeasonId, setEpisodesBySeasonId] = useState<Record<number, Episode[]>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [posterOk, setPosterOk] = useState(true);
@@ -47,6 +56,24 @@ export function TitleDetailsPage() {
       setItem(m);
       setDirectors(ds);
       setCast(cs);
+
+      if ((m as any)?.type?.name === 'SERIES' || m?.seriesInfo) {
+        const ss = await publicEndpoints.seasons.listBySeries(id);
+        setSeasons(ss);
+
+        const pairs = await Promise.all(
+          ss.map(async (s) => {
+            const eps = await publicEndpoints.episodes.listBySeason(s.id);
+            return [s.id, eps] as const;
+          }),
+        );
+        const next: Record<number, Episode[]> = {};
+        for (const [seasonId, eps] of pairs) next[seasonId] = eps;
+        setEpisodesBySeasonId(next);
+      } else {
+        setSeasons([]);
+        setEpisodesBySeasonId({});
+      }
     } catch (e) {
       setError(showError(e));
     } finally {
@@ -148,6 +175,53 @@ export function TitleDetailsPage() {
                     ))}
                   {cast.length === 0 && <div className="muted">{t(lang, 'title_no_cast')}</div>}
                 </div>
+              </div>
+
+              {item.seriesInfo ? (
+                <div className="title-panel">
+                  <div className="title-panel-title">{t(lang, 'title_seasons')}</div>
+                  <div className="title-people">
+                    {seasons
+                      .slice()
+                      .sort((a, b) => a.seasonNumber - b.seasonNumber)
+                      .map((s) => (
+                        <div key={s.id} className="title-person">
+                          <div className="title-person-name">
+                            {t(lang, 'title_seasons')} {s.seasonNumber}
+                            {s.releaseYear ? ` (${s.releaseYear})` : ''}
+                          </div>
+                          <div className="title-person-sub">
+                            {t(lang, 'title_episodes')}: {(episodesBySeasonId[s.id]?.length ?? 0)}
+                          </div>
+
+                          {episodesBySeasonId[s.id]?.length ? (
+                            <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>
+                              {episodesBySeasonId[s.id]
+                                .slice()
+                                .sort((a, b) => a.episodeNumber - b.episodeNumber)
+                                .map((e) => (
+                                  <div key={e.id} className="title-person-sub">
+                                    {`E${e.episodeNumber}`}
+                                    {e.airDate ? ` • ${fmtDate(e.airDate)}` : ''}
+                                    {e.durationMinutes ? ` • ${fmtMinutes(e.durationMinutes)}` : ''}
+                                  </div>
+                                ))}
+                            </div>
+                          ) : (
+                            <div className="muted" style={{ marginTop: 6 }}>{t(lang, 'title_no_episodes')}</div>
+                          )}
+                        </div>
+                      ))}
+                    {seasons.length === 0 && <div className="muted">{t(lang, 'title_no_seasons')}</div>}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="title-panel">
+              <div className="title-panel-title">{t(lang, 'title_production_notes')}</div>
+              <div className="title-overview title-production-notes">
+                {item.productionNotes ?? t(lang, 'title_no_production_notes')}
               </div>
             </div>
           </div>

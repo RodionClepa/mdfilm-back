@@ -518,6 +518,11 @@
   white-space: pre-wrap;
 }
 
+.title-production-notes {
+  max-height: 720px;
+  overflow-y: auto;
+}
+
 .title-people {
   display: grid;
   grid-template-columns: 1fr;

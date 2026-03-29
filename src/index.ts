@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express, { Express } from "express";
+import path from 'node:path';
 import movieRoutes from "./routes/movie.route.js";
 import mediaRoutes from "./routes/media.route.js";
 import seriesRoutes from "./routes/series.route.js";
@@ -11,6 +12,7 @@ import homepageRoutes from "./routes/homepage.route.js";
 import authRoutes from "./routes/auth.route.js";
 import bookmarkRoutes from "./routes/bookmark.route.js";
 import newsRoutes from "./routes/news.route.js";
+import adminImportRoutes from "./routes/adminImport.route.js";
 
 const app: Express = express();
 
@@ -23,9 +25,12 @@ app.use((req, res, next) => {
 });
 app.use(express.json());        // for JSON bodies
 app.use(express.urlencoded({ extended: true })); // for form data
+
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
 const port = process.env.PORT || 3000;
 
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminImportRoutes);
 
 app.use('/api/bookmarks', bookmarkRoutes);
 

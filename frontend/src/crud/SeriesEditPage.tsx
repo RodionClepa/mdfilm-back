@@ -23,13 +23,16 @@ export function SeriesEditPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [i18nEnabled, setI18nEnabled] = useState({ ro: false, ru: false });
-  const [i18nRo, setI18nRo] = useState({ title: '', synopsis: '' });
-  const [i18nRu, setI18nRu] = useState({ title: '', synopsis: '' });
+  const [i18nRo, setI18nRo] = useState({ title: '', synopsis: '', productionNotes: '' });
+  const [i18nRu, setI18nRu] = useState({ title: '', synopsis: '', productionNotes: '' });
+
+  const [posterFile, setPosterFile] = useState<File | null>(null);
 
   const [form, setForm] = useState({
     title: '',
     releaseDate: '',
     synopsis: '',
+    productionNotes: '',
     country: '',
     posterImage: '',
     totalSeasons: '',
@@ -53,6 +56,7 @@ export function SeriesEditPage() {
         title: s.title ?? '',
         releaseDate: toDateInput(s.releaseDate),
         synopsis: s.synopsis ?? '',
+        productionNotes: (s as any).productionNotes ?? '',
         country: s.country ?? '',
         posterImage: s.posterImage ?? '',
         totalSeasons: s.seriesInfo?.totalSeasons != null ? String(s.seriesInfo.totalSeasons) : '',
@@ -63,11 +67,32 @@ export function SeriesEditPage() {
 
       const roTitle = sRo?.title ?? '';
       const roSynopsis = sRo?.synopsis ?? '';
+      const roProductionNotes = (sRo as any)?.productionNotes ?? '';
       const ruTitle = sRu?.title ?? '';
       const ruSynopsis = sRu?.synopsis ?? '';
-      setI18nRo({ title: roTitle, synopsis: roSynopsis });
-      setI18nRu({ title: ruTitle, synopsis: ruSynopsis });
+      const ruProductionNotes = (sRu as any)?.productionNotes ?? '';
+      setI18nRo({ title: roTitle, synopsis: roSynopsis, productionNotes: roProductionNotes });
+      setI18nRu({ title: ruTitle, synopsis: ruSynopsis, productionNotes: ruProductionNotes });
       setI18nEnabled({ ro: Boolean(roTitle.trim()), ru: Boolean(ruTitle.trim()) });
+    } catch (e) {
+      setError(showError(e));
+    } finally {
+      setLoading(false);
+    }
+
+  }
+
+  async function onUploadPoster() {
+    if (!posterFile) return;
+    setError(null);
+    setLoading(true);
+    try {
+      const fd = new FormData();
+      fd.append('poster', posterFile);
+      const updated = await api<Media>(`/api/media/${id}/poster`, { method: 'POST', body: fd });
+      setItem(updated);
+      setForm((f) => ({ ...f, posterImage: updated.posterImage ?? '' }));
+      setPosterFile(null);
     } catch (e) {
       setError(showError(e));
     } finally {
@@ -96,6 +121,7 @@ export function SeriesEditPage() {
       const payload: any = {
         title: form.title || undefined,
         synopsis: form.synopsis || undefined,
+        productionNotes: form.productionNotes || undefined,
         country: form.country || undefined,
         posterImage: form.posterImage || undefined,
         totalSeasons: numOrUndefined(form.totalSeasons),
@@ -139,9 +165,10 @@ export function SeriesEditPage() {
             fields={[
               { key: 'title', label: 'title' },
               { key: 'synopsis', label: 'synopsis', multiline: true },
+              { key: 'productionNotes', label: 'productionNotes', multiline: true },
             ]}
             requiredKeys={['title']}
-            en={{ title: form.title, synopsis: form.synopsis }}
+            en={{ title: form.title, synopsis: form.synopsis, productionNotes: form.productionNotes }}
             ro={i18nRo}
             ru={i18nRu}
             enabled={i18nEnabled}
@@ -150,13 +177,22 @@ export function SeriesEditPage() {
                 ...f,
                 title: String(next.title ?? ''),
                 synopsis: String(next.synopsis ?? ''),
+                productionNotes: String(next.productionNotes ?? ''),
               }))
             }
             onChangeRo={(next) =>
-              setI18nRo({ title: String(next.title ?? ''), synopsis: String(next.synopsis ?? '') })
+              setI18nRo({
+                title: String(next.title ?? ''),
+                synopsis: String(next.synopsis ?? ''),
+                productionNotes: String(next.productionNotes ?? ''),
+              })
             }
             onChangeRu={(next) =>
-              setI18nRu({ title: String(next.title ?? ''), synopsis: String(next.synopsis ?? '') })
+              setI18nRu({
+                title: String(next.title ?? ''),
+                synopsis: String(next.synopsis ?? ''),
+                productionNotes: String(next.productionNotes ?? ''),
+              })
             }
             onChangeEnabled={setI18nEnabled}
           />
@@ -171,6 +207,19 @@ export function SeriesEditPage() {
           <div className="row">
             <div className="muted">posterImage</div>
             <input value={form.posterImage} onChange={(e) => setForm((f) => ({ ...f, posterImage: e.target.value }))} placeholder="optional url" />
+          </div>
+          <div className="row">
+            <div className="muted">poster upload</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPosterFile(e.target.files?.[0] ?? null)}
+              />
+              <button onClick={() => void onUploadPoster()} disabled={loading || !posterFile}>
+                Upload
+              </button>
+            </div>
           </div>
           <div className="row">
             <div className="muted">firstAirDate</div>

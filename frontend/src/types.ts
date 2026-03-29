@@ -74,6 +74,7 @@ export interface Media {
   title: string;
   releaseDate: string;
   synopsis?: string | null;
+  productionNotes?: string | null;
   country?: string | null;
   posterImage?: string | null;
   typeId: number;

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { mediaService } from '../services/media.service.js';
 import { getReqLocale } from '../i18n/locale.js';
+import { posterStorageService } from '../services/posterStorage.service.js';
 
 class MediaController {
   async getMedia(req: Request, res: Response) {
@@ -53,6 +54,33 @@ class MediaController {
       res.status(204).send();
     } catch (error: any) {
       res.status(400).json({ error: error.message ?? 'Delete failed' });
+    }
+  }
+
+  async uploadPoster(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      if (!id) return res.status(400).json({ error: 'Invalid media id' });
+
+      const file = (req as any).file as { buffer: Buffer; mimetype: string; size: number } | undefined;
+      if (!file) return res.status(400).json({ error: 'Poster file is required' });
+
+      const prev = await mediaService.getById(id, 'en');
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+      const saved = await posterStorageService.savePoster(
+        { buffer: file.buffer, mimetype: file.mimetype, size: file.size },
+        baseUrl,
+      );
+
+      if (prev?.posterImage) {
+        await posterStorageService.deleteIfLocalPosterUrl(prev.posterImage);
+      }
+
+      const updated = await mediaService.update(id, { posterImage: saved.url } as any);
+      return res.status(200).json(updated);
+    } catch (error: any) {
+      return res.status(400).json({ error: error?.message ?? 'Poster upload failed' });
     }
   }
 

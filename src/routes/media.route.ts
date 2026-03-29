@@ -1,14 +1,27 @@
 import { Router } from 'express';
 import { mediaController } from '../controllers/media.controller.js';
 import { requireAdmin } from '../middleware/auth.js';
+import multer from 'multer';
 
 const router = Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 router.get('/', mediaController.getMedia.bind(mediaController));
 router.get('/:id', mediaController.getMediaById.bind(mediaController));
 router.post('/', requireAdmin, mediaController.createMedia.bind(mediaController));
 router.put('/:id', requireAdmin, mediaController.updateMedia.bind(mediaController));
 router.delete('/:id', requireAdmin, mediaController.deleteMedia.bind(mediaController));
+
+router.post(
+  '/:id/poster',
+  requireAdmin,
+  upload.single('poster'),
+  mediaController.uploadPoster.bind(mediaController),
+);
 
 // Directors are attached AFTER media creation (many-to-many)
 router.get('/:id/directors', mediaController.getMediaDirectors.bind(mediaController));
